@@ -1,0 +1,14 @@
+{
+  "name": "resort/system",
+  "description": "An integrated digital management system for private pool resorts.",
+  "require": {
+    "phpmailer/phpmailer": "^6.5",
+    "dompdf/dompdf": "^3.1"
+  },
+  "authors": [
+    {
+      "name": "ResortSystemDevTeam",
+      "email": "dev@resortsystem.com"
+    }
+  ]
+}

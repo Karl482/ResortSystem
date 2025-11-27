@@ -1,0 +1,2060 @@
+/* ==========================================================================
+   MAIN APPLICATION STYLESHEET
+   Integrated Digital Management System - Resort Haven
+   ========================================================================== */
+
+/* ==========================================================================
+   1. CSS Variables and Root Configuration
+   ========================================================================== */
+:root {
+  /* Light Theme Colors */
+  --color-bg-light: #f8f5f0;
+  --color-bg-card-light: #fdfbf8;
+  --color-text-light: #3a2d27;
+  --color-text-muted-light: #6c5d53;
+  --color-border-light: #e8e0d8;
+  --color-primary: #0d6efd;
+  --color-success: #198754;
+  --color-warning: #ffc107;
+  --color-danger: #dc3545;
+
+  /* Dark Theme Colors */
+  --color-bg-dark: #3a2d27;
+  --color-bg-card-dark: #4a3c35;
+  --color-text-dark: #f0e9e0;
+  --color-text-muted-dark: #b8a99e;
+  --color-border-dark: #5a4c44;
+}
+
+/* ==========================================================================
+   2. General Body Styles
+   ========================================================================== */
+body {
+  background-color: var(--color-bg-light);
+  color: var(--color-text-light);
+  font-family: "Segoe UI", Tahoma, Geneva, Verdana, sans-serif;
+  transition: background-color 0.3s ease, color 0.3s ease;
+  min-height: 100vh;
+  position: relative;
+}
+
+/* ==========================================================================
+   3. Background Wave Effect
+   ========================================================================== */
+@keyframes animate-waves {
+  0% {
+    transform: translateX(0) scale(1.05);
+  }
+  50% {
+    transform: translateX(-20px) scale(1.05);
+  }
+  100% {
+    transform: translateX(0) scale(1.05);
+  }
+}
+
+.main-background-overlay {
+  content: "";
+  position: fixed;
+  top: 0;
+  left: 0;
+  width: 100%;
+  height: 100%;
+  /* Light theme - sandy beach waves with blue water */
+  background-image: url('data:image/svg+xml,<svg xmlns="http://www.w3.org/2000/svg" viewBox="0 0 1440 320"><defs><linearGradient id="light-gradient" x1="0%" y1="0%" x2="0%" y2="100%"><stop offset="0%" style="stop-color:%2387CEEB;stop-opacity:1" /><stop offset="100%" style="stop-color:%2300BFFF;stop-opacity:1" /></linearGradient></defs><path fill="url(%23light-gradient)" d="M0,160L48,170.7C96,181,192,203,288,208C384,213,480,203,576,176C672,149,768,107,864,112C960,117,1056,171,1152,181.3C1248,192,1344,160,1392,144L1440,128L1440,320L1392,320C1344,320,1248,320,1152,320C1056,320,960,320,864,320C768,320,672,320,576,320C480,320,384,320,288,320C192,320,96,320,48,320L0,320Z"></path><path fill="%23FAD7A0" fill-opacity="0.5" d="M0,224L48,213.3C96,203,192,181,288,192C384,203,480,245,576,250.7C672,256,768,224,864,197.3C960,171,1056,149,1152,154.7C1248,160,1344,192,1392,208L1440,224L1440,320L1392,320C1344,320,1248,320,1152,320C1056,320,960,320,864,320C768,320,672,320,576,320C480,320,384,320,288,320C192,320,96,320,48,320L0,320Z"></path></svg>');
+  background-size: cover;
+  background-position: bottom;
+  z-index: -1;
+  opacity: 1;
+  animation: animate-waves 15s ease-in-out infinite;
+  transform-origin: bottom;
+  pointer-events: none;
+}
+
+/* ==========================================================================
+   4. Navigation Bar Styles
+   ========================================================================== */
+.navbar {
+  background-color: rgba(248, 245, 240, 0.95) !important;
+  backdrop-filter: blur(10px);
+  box-shadow: 0 2px 10px rgba(58, 45, 39, 0.1);
+  transition: background-color 0.3s ease, box-shadow 0.3s ease;
+  z-index: 1030;
+}
+
+/* Ensure sticky-top works properly */
+.navbar.sticky-top {
+  position: sticky;
+  top: 0;
+}
+
+.navbar-brand,
+.navbar .nav-link {
+  color: var(--color-text-light) !important;
+  transition: color 0.2s ease;
+}
+
+/* Add spacing between icon and text in navbar brand */
+.navbar-brand i,
+.mobile-brand i,
+.sidebar-brand i {
+  margin-right: 0.5rem;
+}
+
+.navbar .nav-link:hover {
+  color: var(--color-primary) !important;
+}
+
+.navbar .nav-link.active {
+  color: var(--color-primary) !important;
+  font-weight: 600;
+}
+
+.navbar-toggler {
+  border-color: var(--color-border-light);
+}
+
+.navbar-toggler-icon {
+  background-image: url("data:image/svg+xml,%3csvg xmlns='http://www.w3.org/2000/svg' viewBox='0 0 30 30'%3e%3cpath stroke='rgba%2858, 45, 39, 0.75%29' stroke-linecap='round' stroke-miterlimit='10' stroke-width='2' d='M4 7h22M4 15h22M4 23h22'/%3e%3c/svg%3e");
+}
+
+/* Dropdown menus */
+.navbar .dropdown-menu {
+  background-color: var(--color-bg-card-light);
+  border: 1px solid var(--color-border-light);
+  box-shadow: 0 4px 15px rgba(58, 45, 39, 0.1);
+}
+
+.navbar .dropdown-item {
+  color: var(--color-text-light);
+  transition: background-color 0.2s ease;
+}
+
+.navbar .dropdown-item:hover {
+  background-color: rgba(13, 110, 253, 0.1);
+  color: var(--color-primary);
+}
+
+/* ==========================================================================
+   5. Main Content Container
+   ========================================================================== */
+/* Note: We don't set z-index on container to avoid creating stacking context
+   that would interfere with Bootstrap modals */
+
+/* ==========================================================================
+   6. Card Styles
+   ========================================================================== */
+.card {
+  background-color: var(--color-bg-card-light);
+  border: 1px solid var(--color-border-light);
+  border-radius: 12px;
+  box-shadow: 0 4px 15px rgba(58, 45, 39, 0.08);
+  transition: background-color 0.3s ease, border-color 0.3s ease,
+    box-shadow 0.3s ease, transform 0.2s ease;
+}
+
+.card:hover {
+  transform: translateY(-2px);
+  box-shadow: 0 6px 20px rgba(58, 45, 39, 0.12);
+}
+
+.card-header {
+  background-color: rgba(58, 45, 39, 0.05);
+  border-bottom: 1px solid var(--color-border-light);
+  color: var(--color-text-light);
+}
+
+.card-body {
+  color: var(--color-text-light);
+}
+
+.card-footer {
+  background-color: rgba(58, 45, 39, 0.03);
+  border-top: 1px solid var(--color-border-light);
+}
+
+/* ==========================================================================
+   7. Form Controls
+   ========================================================================== */
+.form-control,
+.form-select {
+  background-color: #fff;
+  border: 1px solid var(--color-border-light);
+  color: var(--color-text-light);
+  border-radius: 8px;
+  transition: border-color 0.2s ease, box-shadow 0.2s ease;
+}
+
+.form-control:focus,
+.form-select:focus {
+  background-color: #fff;
+  border-color: var(--color-primary);
+  box-shadow: 0 0 0 0.25rem rgba(13, 110, 253, 0.25);
+  color: var(--color-text-light);
+}
+
+.form-label {
+  color: var(--color-text-light);
+  font-weight: 500;
+}
+
+/* ==========================================================================
+   8. Button Overrides
+   ========================================================================== */
+.btn-primary {
+  background-color: var(--color-primary);
+  border-color: var(--color-primary);
+}
+
+.btn-outline-primary {
+  color: var(--color-primary);
+  border-color: var(--color-primary);
+}
+
+.btn-outline-primary:hover {
+  background-color: var(--color-primary);
+  color: #fff;
+}
+
+/* ==========================================================================
+   9. Alert Styles
+   ========================================================================== */
+.alert {
+  border-radius: 10px;
+  border: none;
+}
+
+.alert-info {
+  background-color: rgba(13, 110, 253, 0.1);
+  color: #084298;
+}
+
+.alert-success {
+  background-color: rgba(25, 135, 84, 0.1);
+  color: #0f5132;
+}
+
+.alert-warning {
+  background-color: rgba(255, 193, 7, 0.15);
+  color: #664d03;
+}
+
+.alert-danger {
+  background-color: rgba(220, 53, 69, 0.1);
+  color: #842029;
+}
+
+/* ==========================================================================
+   10. Modal Styles
+   ========================================================================== */
+/* Ensure modals appear above everything including navbar */
+.modal {
+  z-index: 1060 !important;
+}
+
+.modal-backdrop {
+  z-index: 1055 !important;
+}
+
+.modal-dialog {
+  z-index: 1065 !important;
+}
+
+.modal-content {
+  background-color: var(--color-bg-card-light);
+  border: 1px solid var(--color-border-light);
+  border-radius: 12px;
+  box-shadow: 0 10px 40px rgba(58, 45, 39, 0.2);
+  position: relative;
+  z-index: 1;
+}
+
+.modal-header {
+  border-bottom: 1px solid var(--color-border-light);
+}
+
+.modal-footer {
+  border-top: 1px solid var(--color-border-light);
+}
+
+.modal-title {
+  color: var(--color-text-light);
+}
+
+/* ==========================================================================
+   11. Table Styles
+   ========================================================================== */
+.table {
+  color: var(--color-text-light);
+}
+
+.table thead th {
+  background-color: rgba(58, 45, 39, 0.05);
+  border-bottom: 2px solid var(--color-border-light);
+  color: var(--color-text-light);
+}
+
+.table tbody td {
+  border-bottom: 1px solid var(--color-border-light);
+}
+
+.table-striped tbody tr:nth-of-type(odd) {
+  background-color: rgba(58, 45, 39, 0.02);
+}
+
+.table-hover tbody tr:hover {
+  background-color: rgba(13, 110, 253, 0.05);
+}
+
+/* ==========================================================================
+   12. Accordion Styles
+   ========================================================================== */
+.accordion-item {
+  background-color: var(--color-bg-card-light);
+  border: 1px solid var(--color-border-light);
+}
+
+.accordion-button {
+  background-color: var(--color-bg-card-light);
+  color: var(--color-text-light);
+}
+
+.accordion-button:not(.collapsed) {
+  background-color: rgba(13, 110, 253, 0.1);
+  color: var(--color-primary);
+}
+
+.accordion-body {
+  background-color: var(--color-bg-card-light);
+}
+
+/* ==========================================================================
+   13. Nav Tabs Styles
+   ========================================================================== */
+.nav-tabs {
+  border-bottom: 2px solid var(--color-border-light);
+}
+
+.nav-tabs .nav-link {
+  color: var(--color-text-muted-light);
+  border: none;
+  border-bottom: 2px solid transparent;
+  margin-bottom: -2px;
+  transition: color 0.2s ease, border-color 0.2s ease;
+}
+
+.nav-tabs .nav-link:hover {
+  color: var(--color-primary);
+  border-color: transparent;
+}
+
+.nav-tabs .nav-link.active {
+  color: var(--color-primary);
+  background-color: transparent;
+  border-color: var(--color-primary);
+  font-weight: 600;
+}
+
+/* ==========================================================================
+   14. Badge Styles
+   ========================================================================== */
+.badge {
+  font-weight: 500;
+  border-radius: 6px;
+}
+
+/* ==========================================================================
+   15. Theme Switcher Styles
+   ========================================================================== */
+.theme-switcher {
+  cursor: pointer;
+  display: flex;
+  align-items: center;
+  gap: 0;
+  padding: 0.2rem;
+  border-radius: 1.1rem;
+  background-color: #e9ecef;
+  transition: background-color 0.3s ease;
+  margin-left: 1rem;
+  position: relative;
+  height: 1.9rem;
+}
+
+.theme-switcher-slider {
+  position: absolute;
+  top: 0.2rem;
+  left: 0.2rem;
+  width: 1.5rem;
+  height: 1.5rem;
+  background-color: var(--color-primary);
+  border-radius: 50%;
+  transition: transform 0.3s cubic-bezier(0.25, 0.8, 0.25, 1);
+  z-index: 0;
+}
+
+.theme-switcher i {
+  z-index: 1;
+  font-size: 0.8rem;
+  color: #6c757d;
+  transition: color 0.3s ease;
+  width: 1.5rem;
+  height: 1.5rem;
+  display: inline-flex;
+  justify-content: center;
+  align-items: center;
+  padding: 0;
+}
+
+.theme-switcher i.active {
+  color: #fff;
+}
+
+/* ==========================================================================
+   16. DARK THEME OVERRIDES
+   ========================================================================== */
+body.dark-theme {
+  background-color: var(--color-bg-dark);
+  color: var(--color-text-dark);
+}
+
+/* Dark theme background overlay */
+body.dark-theme .main-background-overlay {
+  background-image: url('data:image/svg+xml,<svg xmlns="http://www.w3.org/2000/svg" viewBox="0 0 1440 320"><defs><linearGradient id="dark-gradient" x1="0%" y1="0%" x2="0%" y2="100%"><stop offset="0%" style="stop-color:%232C3E50;stop-opacity:1" /><stop offset="100%" style="stop-color:%234CA1AF;stop-opacity:1" /></linearGradient></defs><path fill="url(%23dark-gradient)" d="M0,160L48,170.7C96,181,192,203,288,208C384,213,480,203,576,176C672,149,768,107,864,112C960,117,1056,171,1152,181.3C1248,192,1344,160,1392,144L1440,128L1440,320L1392,320C1344,320,1248,320,1152,320C1056,320,960,320,864,320C768,320,672,320,576,320C480,320,384,320,288,320C192,320,96,320,48,320L0,320Z"></path><path fill="%231A2930" fill-opacity="0.5" d="M0,224L48,213.3C96,203,192,181,288,192C384,203,480,245,576,250.7C672,256,768,224,864,197.3C960,171,1056,149,1152,154.7C1248,160,1344,192,1392,208L1440,224L1440,320L1392,320C1344,320,1248,320,1152,320C1056,320,960,320,864,320C768,320,672,320,576,320C480,320,384,320,288,320C192,320,96,320,48,320L0,320Z"></path></svg>');
+}
+
+/* Dark theme navbar */
+body.dark-theme .navbar {
+  background-color: rgba(58, 45, 39, 0.95) !important;
+  box-shadow: 0 2px 10px rgba(0, 0, 0, 0.3);
+}
+
+body.dark-theme .navbar-brand,
+body.dark-theme .navbar .nav-link {
+  color: var(--color-text-dark) !important;
+}
+
+body.dark-theme .navbar .nav-link:hover {
+  color: #8ab4f8 !important;
+}
+
+body.dark-theme .navbar-toggler {
+  border-color: var(--color-border-dark);
+}
+
+body.dark-theme .navbar-toggler-icon {
+  background-image: url("data:image/svg+xml,%3csvg xmlns='http://www.w3.org/2000/svg' viewBox='0 0 30 30'%3e%3cpath stroke='rgba%28240, 233, 224, 0.75%29' stroke-linecap='round' stroke-miterlimit='10' stroke-width='2' d='M4 7h22M4 15h22M4 23h22'/%3e%3c/svg%3e");
+}
+
+body.dark-theme .navbar .dropdown-menu {
+  background-color: var(--color-bg-card-dark);
+  border-color: var(--color-border-dark);
+  box-shadow: 0 4px 15px rgba(0, 0, 0, 0.3);
+}
+
+body.dark-theme .navbar .dropdown-item {
+  color: var(--color-text-dark);
+}
+
+body.dark-theme .navbar .dropdown-item:hover {
+  background-color: rgba(138, 180, 248, 0.1);
+  color: #8ab4f8;
+}
+
+/* Dark theme cards */
+body.dark-theme .card {
+  background-color: var(--color-bg-card-dark);
+  border-color: var(--color-border-dark);
+  box-shadow: 0 4px 15px rgba(0, 0, 0, 0.2);
+}
+
+body.dark-theme .card:hover {
+  box-shadow: 0 6px 20px rgba(0, 0, 0, 0.3);
+}
+
+body.dark-theme .card-header {
+  background-color: rgba(240, 233, 224, 0.05);
+  border-bottom-color: var(--color-border-dark);
+  color: var(--color-text-dark);
+}
+
+body.dark-theme .card-body {
+  color: var(--color-text-dark);
+}
+
+body.dark-theme .card-footer {
+  background-color: rgba(240, 233, 224, 0.03);
+  border-top-color: var(--color-border-dark);
+}
+
+/* Dark theme form controls */
+body.dark-theme .form-control,
+body.dark-theme .form-select {
+  background-color: var(--color-border-dark);
+  border-color: #6a5c53;
+  color: var(--color-text-dark);
+}
+
+body.dark-theme .form-control:focus,
+body.dark-theme .form-select:focus {
+  background-color: #6a5c53;
+  border-color: #8ab4f8;
+  color: var(--color-text-dark);
+}
+
+body.dark-theme .form-label {
+  color: var(--color-text-dark);
+}
+
+/* Dark theme modals */
+body.dark-theme .modal-content {
+  background-color: var(--color-bg-card-dark);
+  border-color: var(--color-border-dark);
+  box-shadow: 0 10px 40px rgba(0, 0, 0, 0.4);
+}
+
+body.dark-theme .modal-header {
+  border-bottom-color: var(--color-border-dark);
+}
+
+body.dark-theme .modal-footer {
+  border-top-color: var(--color-border-dark);
+}
+
+body.dark-theme .modal-title {
+  color: var(--color-text-dark);
+}
+
+body.dark-theme .btn-close {
+  filter: invert(1) grayscale(100%) brightness(200%);
+}
+
+/* Dark theme tables */
+body.dark-theme .table {
+  color: var(--color-text-dark);
+}
+
+body.dark-theme .table thead th {
+  background-color: rgba(240, 233, 224, 0.05);
+  border-bottom-color: var(--color-border-dark);
+  color: var(--color-text-dark);
+}
+
+body.dark-theme .table tbody td {
+  border-bottom-color: var(--color-border-dark);
+}
+
+body.dark-theme .table-striped tbody tr:nth-of-type(odd) {
+  background-color: rgba(240, 233, 224, 0.02);
+}
+
+body.dark-theme .table-hover tbody tr:hover {
+  background-color: rgba(138, 180, 248, 0.05);
+}
+
+/* Dark theme accordion */
+body.dark-theme .accordion-item {
+  background-color: var(--color-bg-card-dark);
+  border-color: var(--color-border-dark);
+}
+
+body.dark-theme .accordion-button {
+  background-color: var(--color-bg-card-dark);
+  color: var(--color-text-dark);
+}
+
+body.dark-theme .accordion-button:not(.collapsed) {
+  background-color: rgba(138, 180, 248, 0.1);
+  color: #8ab4f8;
+}
+
+body.dark-theme .accordion-button::after {
+  filter: invert(1) grayscale(100%) brightness(200%);
+}
+
+body.dark-theme .accordion-body {
+  background-color: var(--color-bg-card-dark);
+}
+
+/* Dark theme nav tabs */
+body.dark-theme .nav-tabs {
+  border-bottom-color: var(--color-border-dark);
+}
+
+body.dark-theme .nav-tabs .nav-link {
+  color: var(--color-text-muted-dark);
+}
+
+body.dark-theme .nav-tabs .nav-link:hover {
+  color: #8ab4f8;
+}
+
+body.dark-theme .nav-tabs .nav-link.active {
+  color: #8ab4f8;
+  border-color: #8ab4f8;
+}
+
+/* Dark theme alerts */
+body.dark-theme .alert-info {
+  background-color: rgba(138, 180, 248, 0.15);
+  color: #8ab4f8;
+}
+
+body.dark-theme .alert-success {
+  background-color: rgba(25, 135, 84, 0.2);
+  color: #75b798;
+}
+
+body.dark-theme .alert-warning {
+  background-color: rgba(255, 193, 7, 0.2);
+  color: #ffda6a;
+}
+
+body.dark-theme .alert-danger {
+  background-color: rgba(220, 53, 69, 0.2);
+  color: #ea868f;
+}
+
+/* Dark theme links */
+body.dark-theme a {
+  color: #8ab4f8;
+}
+
+body.dark-theme a:hover {
+  color: #aecbfa;
+}
+
+/* Dark theme theme switcher */
+body.dark-theme .theme-switcher {
+  background-color: var(--color-border-dark);
+}
+
+body.dark-theme .theme-switcher-slider {
+  background-color: #f8f9fa;
+  transform: translateX(1.5rem);
+}
+
+body.dark-theme .theme-switcher i {
+  color: #adb5bd;
+}
+
+body.dark-theme .theme-switcher i.active {
+  color: #212529;
+}
+
+/* Dark theme text utilities */
+body.dark-theme .text-muted {
+  color: var(--color-text-muted-dark) !important;
+}
+
+body.dark-theme .text-dark {
+  color: var(--color-text-dark) !important;
+}
+
+/* Dark theme badge adjustments */
+body.dark-theme .badge.bg-light {
+  background-color: rgba(240, 233, 224, 0.15) !important;
+  color: var(--color-text-dark) !important;
+}
+
+/* ==========================================================================
+   17.5 Primary Background Elements (bg-primary) - Text Contrast Fix
+   ========================================================================== */
+/* Ensure text-white remains white on bg-primary in both themes */
+.bg-primary,
+.bg-primary.text-white,
+.card.bg-primary,
+.card-header.bg-primary,
+.modal-header.bg-primary {
+  color: #fff !important;
+}
+
+.bg-primary .text-white,
+.bg-primary h1,
+.bg-primary h2,
+.bg-primary h3,
+.bg-primary h4,
+.bg-primary h5,
+.bg-primary h6,
+.bg-primary .card-title,
+.bg-primary .card-text,
+.bg-primary .modal-title {
+  color: #fff !important;
+}
+
+/* Dark theme: Keep bg-primary elements readable */
+body.dark-theme .bg-primary,
+body.dark-theme .bg-primary.text-white,
+body.dark-theme .card.bg-primary,
+body.dark-theme .card-header.bg-primary,
+body.dark-theme .modal-header.bg-primary {
+  background-color: #0d6efd !important;
+  color: #fff !important;
+}
+
+body.dark-theme .bg-primary .text-white,
+body.dark-theme .bg-primary h1,
+body.dark-theme .bg-primary h2,
+body.dark-theme .bg-primary h3,
+body.dark-theme .bg-primary h4,
+body.dark-theme .bg-primary h5,
+body.dark-theme .bg-primary h6,
+body.dark-theme .bg-primary .card-title,
+body.dark-theme .bg-primary .card-text,
+body.dark-theme .bg-primary .modal-title {
+  color: #fff !important;
+}
+
+/* Links inside bg-primary elements */
+.bg-primary a:not(.btn),
+body.dark-theme .bg-primary a:not(.btn) {
+  color: #e0e0ff !important;
+}
+
+.bg-primary a:not(.btn):hover,
+body.dark-theme .bg-primary a:not(.btn):hover {
+  color: #fff !important;
+}
+
+/* Ensure other colored backgrounds maintain proper text contrast */
+.bg-success,
+.bg-danger,
+.bg-info,
+.bg-secondary {
+  color: #fff !important;
+}
+
+.bg-warning {
+  color: #212529 !important;
+}
+
+/* Target common child text elements as well for high contrast */
+.bg-success h1,
+.bg-success h2,
+.bg-success h3,
+.bg-success h4,
+.bg-success h5,
+.bg-success h6,
+.bg-success p,
+.bg-success .card-title,
+.bg-success .card-text,
+.bg-danger h1,
+.bg-danger h2,
+.bg-danger h3,
+.bg-danger h4,
+.bg-danger h5,
+.bg-danger h6,
+.bg-danger p,
+.bg-danger .card-title,
+.bg-danger .card-text,
+.bg-info h1,
+.bg-info h2,
+.bg-info h3,
+.bg-info h4,
+.bg-info h5,
+.bg-info h6,
+.bg-info p,
+.bg-info .card-title,
+.bg-info .card-text,
+.bg-secondary h1,
+.bg-secondary h2,
+.bg-secondary h3,
+.bg-secondary h4,
+.bg-secondary h5,
+.bg-secondary h6,
+.bg-secondary p,
+.bg-secondary .card-title,
+.bg-secondary .card-text {
+  color: #fff !important;
+}
+
+.bg-warning h1,
+.bg-warning h2,
+.bg-warning h3,
+.bg-warning h4,
+.bg-warning h5,
+.bg-warning h6,
+.bg-warning p,
+.bg-warning .card-title,
+.bg-warning .card-text {
+  color: #212529 !important;
+}
+
+/* Card with bg-primary specific fixes */
+.card.bg-primary .card-header,
+body.dark-theme .card.bg-primary .card-header {
+  background-color: rgba(0, 0, 0, 0.1) !important;
+  border-bottom-color: rgba(255, 255, 255, 0.2) !important;
+}
+
+.card.bg-primary .card-body,
+body.dark-theme .card.bg-primary .card-body {
+  color: #fff !important;
+}
+
+/* Modal header with bg-primary */
+.modal-header.bg-primary .btn-close-white,
+body.dark-theme .modal-header.bg-primary .btn-close-white {
+  filter: none !important;
+}
+
+/* ==========================================================================
+   17. Page Headings
+   ========================================================================== */
+h1,
+h2,
+h3,
+h4,
+h5,
+h6 {
+  color: var(--color-text-light);
+  transition: color 0.3s ease;
+}
+
+body.dark-theme h1,
+body.dark-theme h2,
+body.dark-theme h3,
+body.dark-theme h4,
+body.dark-theme h5,
+body.dark-theme h6 {
+  color: var(--color-text-dark);
+}
+
+/* ==========================================================================
+   18. Utility Classes
+   ========================================================================== */
+.bg-sand {
+  background-color: var(--color-bg-light);
+}
+
+body.dark-theme .bg-sand {
+  background-color: var(--color-bg-dark);
+}
+
+/* ==========================================================================
+   19. Responsive Adjustments
+   ========================================================================== */
+@media (max-width: 991.98px) {
+  .navbar .theme-switcher {
+    margin: 0.5rem 0;
+    margin-left: 0;
+  }
+}
+
+/* ==========================================================================
+   20. List Group Styles
+   ========================================================================== */
+.list-group-item {
+  background-color: var(--color-bg-card-light);
+  border-color: var(--color-border-light);
+  color: var(--color-text-light);
+}
+
+body.dark-theme .list-group-item {
+  background-color: var(--color-bg-card-dark);
+  border-color: var(--color-border-dark);
+  color: var(--color-text-dark);
+}
+
+/* ==========================================================================
+   21. Pagination Styles
+   ========================================================================== */
+.page-link {
+  background-color: var(--color-bg-card-light);
+  border-color: var(--color-border-light);
+  color: var(--color-text-light);
+}
+
+.page-link:hover {
+  background-color: rgba(13, 110, 253, 0.1);
+  border-color: var(--color-border-light);
+  color: var(--color-primary);
+}
+
+body.dark-theme .page-link {
+  background-color: var(--color-bg-card-dark);
+  border-color: var(--color-border-dark);
+  color: var(--color-text-dark);
+}
+
+body.dark-theme .page-link:hover {
+  background-color: rgba(138, 180, 248, 0.1);
+  border-color: var(--color-border-dark);
+  color: #8ab4f8;
+}
+
+/* ==========================================================================
+   22. Progress Bar Styles
+   ========================================================================== */
+.progress {
+  background-color: rgba(58, 45, 39, 0.1);
+}
+
+body.dark-theme .progress {
+  background-color: rgba(240, 233, 224, 0.1);
+}
+
+/* ==========================================================================
+   23. Breadcrumb Styles
+   ========================================================================== */
+.breadcrumb {
+  background-color: transparent;
+}
+
+.breadcrumb-item a {
+  color: var(--color-primary);
+}
+
+.breadcrumb-item.active {
+  color: var(--color-text-muted-light);
+}
+
+body.dark-theme .breadcrumb-item a {
+  color: #8ab4f8;
+}
+
+body.dark-theme .breadcrumb-item.active {
+  color: var(--color-text-muted-dark);
+}
+
+/* ==========================================================================
+   24. Tooltip and Popover Styles
+   ========================================================================== */
+.tooltip-inner {
+  background-color: var(--color-text-light);
+}
+
+body.dark-theme .tooltip-inner {
+  background-color: var(--color-text-dark);
+  color: var(--color-text-light);
+}
+
+/* ==========================================================================
+   25. Input Group Styles
+   ========================================================================== */
+.input-group-text {
+  background-color: rgba(58, 45, 39, 0.05);
+  border-color: var(--color-border-light);
+  color: var(--color-text-light);
+}
+
+body.dark-theme .input-group-text {
+  background-color: rgba(240, 233, 224, 0.05);
+  border-color: var(--color-border-dark);
+  color: var(--color-text-dark);
+}
+
+/* ==========================================================================
+   26. Dropdown Styles (General)
+   ========================================================================== */
+.dropdown-menu {
+  background-color: var(--color-bg-card-light);
+  border: 1px solid var(--color-border-light);
+  box-shadow: 0 4px 15px rgba(58, 45, 39, 0.1);
+}
+
+.dropdown-item {
+  color: var(--color-text-light);
+}
+
+.dropdown-item:hover,
+.dropdown-item:focus {
+  background-color: rgba(13, 110, 253, 0.1);
+  color: var(--color-primary);
+}
+
+.dropdown-divider {
+  border-top-color: var(--color-border-light);
+}
+
+body.dark-theme .dropdown-menu {
+  background-color: var(--color-bg-card-dark);
+  border-color: var(--color-border-dark);
+  box-shadow: 0 4px 15px rgba(0, 0, 0, 0.3);
+}
+
+body.dark-theme .dropdown-item {
+  color: var(--color-text-dark);
+}
+
+body.dark-theme .dropdown-item:hover,
+body.dark-theme .dropdown-item:focus {
+  background-color: rgba(138, 180, 248, 0.1);
+  color: #8ab4f8;
+}
+
+body.dark-theme .dropdown-divider {
+  border-top-color: var(--color-border-dark);
+}
+
+/* ==========================================================================
+   27. Offcanvas Styles
+   ========================================================================== */
+.offcanvas {
+  background-color: var(--color-bg-card-light);
+  color: var(--color-text-light);
+}
+
+body.dark-theme .offcanvas {
+  background-color: var(--color-bg-card-dark);
+  color: var(--color-text-dark);
+}
+
+/* ==========================================================================
+   28. Toast Styles
+   ========================================================================== */
+.toast {
+  background-color: var(--color-bg-card-light);
+  border: 1px solid var(--color-border-light);
+  color: var(--color-text-light);
+}
+
+.toast-header {
+  background-color: rgba(58, 45, 39, 0.05);
+  border-bottom: 1px solid var(--color-border-light);
+  color: var(--color-text-light);
+}
+
+body.dark-theme .toast {
+  background-color: var(--color-bg-card-dark);
+  border-color: var(--color-border-dark);
+  color: var(--color-text-dark);
+}
+
+body.dark-theme .toast-header {
+  background-color: rgba(240, 233, 224, 0.05);
+  border-bottom-color: var(--color-border-dark);
+  color: var(--color-text-dark);
+}
+
+/* ==========================================================================
+   29. Scrollbar Styles
+   ========================================================================== */
+::-webkit-scrollbar {
+  width: 10px;
+  height: 10px;
+}
+
+::-webkit-scrollbar-track {
+  background: rgba(58, 45, 39, 0.05);
+  border-radius: 5px;
+}
+
+::-webkit-scrollbar-thumb {
+  background: rgba(58, 45, 39, 0.2);
+  border-radius: 5px;
+}
+
+::-webkit-scrollbar-thumb:hover {
+  background: rgba(58, 45, 39, 0.3);
+}
+
+body.dark-theme ::-webkit-scrollbar-track {
+  background: rgba(240, 233, 224, 0.05);
+}
+
+body.dark-theme ::-webkit-scrollbar-thumb {
+  background: rgba(240, 233, 224, 0.2);
+}
+
+body.dark-theme ::-webkit-scrollbar-thumb:hover {
+  background: rgba(240, 233, 224, 0.3);
+}
+
+/* ==========================================================================
+   30. Selection Styles
+   ========================================================================== */
+::selection {
+  background-color: rgba(13, 110, 253, 0.3);
+  color: var(--color-text-light);
+}
+
+body.dark-theme ::selection {
+  background-color: rgba(138, 180, 248, 0.3);
+  color: var(--color-text-dark);
+}
+
+/* ==========================================================================
+   31. Custom Spinner Styles
+   ========================================================================== */
+.spinner-border {
+  color: var(--color-primary);
+}
+
+body.dark-theme .spinner-border {
+  color: #8ab4f8;
+}
+
+/* ==========================================================================
+   32. Image and Media Styles
+   ========================================================================== */
+.img-thumbnail {
+  background-color: var(--color-bg-card-light);
+  border-color: var(--color-border-light);
+}
+
+body.dark-theme .img-thumbnail {
+  background-color: var(--color-bg-card-dark);
+  border-color: var(--color-border-dark);
+}
+
+/* ==========================================================================
+   33. Carousel Styles
+   ========================================================================== */
+.carousel-control-prev-icon,
+.carousel-control-next-icon {
+  background-color: rgba(58, 45, 39, 0.5);
+  border-radius: 50%;
+  padding: 1rem;
+}
+
+body.dark-theme .carousel-control-prev-icon,
+body.dark-theme .carousel-control-next-icon {
+  background-color: rgba(240, 233, 224, 0.3);
+}
+
+/* ==========================================================================
+   34. Close Button in Cards/Alerts
+   ========================================================================== */
+body.dark-theme .alert .btn-close {
+  filter: invert(1) grayscale(100%) brightness(200%);
+}
+
+/* ==========================================================================
+   35. Form Check Styles (Checkboxes, Radios)
+   ========================================================================== */
+.form-check-input {
+  background-color: #fff;
+  border-color: var(--color-border-light);
+}
+
+.form-check-input:checked {
+  background-color: var(--color-primary);
+  border-color: var(--color-primary);
+}
+
+body.dark-theme .form-check-input {
+  background-color: var(--color-border-dark);
+  border-color: #6a5c53;
+}
+
+body.dark-theme .form-check-input:checked {
+  background-color: #8ab4f8;
+  border-color: #8ab4f8;
+}
+
+.form-check-label {
+  color: var(--color-text-light);
+}
+
+body.dark-theme .form-check-label {
+  color: var(--color-text-dark);
+}
+
+/* ==========================================================================
+   36. Range Slider Styles
+   ========================================================================== */
+.form-range::-webkit-slider-thumb {
+  background: var(--color-primary);
+}
+
+.form-range::-moz-range-thumb {
+  background: var(--color-primary);
+}
+
+body.dark-theme .form-range::-webkit-slider-thumb {
+  background: #8ab4f8;
+}
+
+body.dark-theme .form-range::-moz-range-thumb {
+  background: #8ab4f8;
+}
+
+/* ==========================================================================
+   37. Calendar-specific Styles (for booking forms)
+   ========================================================================== */
+.calendar-day {
+  transition: background-color 0.2s ease, color 0.2s ease;
+}
+
+.calendar-day:hover {
+  background-color: rgba(13, 110, 253, 0.1);
+}
+
+body.dark-theme .calendar-day:hover {
+  background-color: rgba(138, 180, 248, 0.1);
+}
+
+/* ==========================================================================
+   38. Print Styles
+   ========================================================================== */
+@media print {
+  .main-background-overlay {
+    display: none !important;
+  }
+
+  .navbar {
+    display: none !important;
+  }
+
+  body,
+  body.dark-theme {
+    background-color: #fff !important;
+    color: #000 !important;
+  }
+
+  .card {
+    box-shadow: none !important;
+    border: 1px solid #ddd !important;
+  }
+}
+
+/* ==========================================================================
+   39. Transition Utilities
+   ========================================================================== */
+.theme-transition * {
+  transition: background-color 0.3s ease, color 0.3s ease,
+    border-color 0.3s ease, box-shadow 0.3s ease !important;
+}
+
+/* ==========================================================================
+   40. Chart.js Dark Theme Support
+   ========================================================================== */
+body.dark-theme canvas {
+  filter: brightness(0.95);
+}
+
+/* ==========================================================================
+   41. Profile Page Styles
+   ========================================================================== */
+/* Profile card enhancements */
+.card .form-label.small {
+  font-size: 0.85rem;
+  font-weight: 500;
+  color: var(--color-text-muted-light);
+  margin-bottom: 0.375rem;
+}
+
+body.dark-theme .card .form-label.small {
+  color: var(--color-text-muted-dark);
+}
+
+/* Profile image styling */
+.card .img-thumbnail.rounded-circle {
+  border: 3px solid var(--color-border-light);
+  box-shadow: 0 4px 12px rgba(58, 45, 39, 0.1);
+  transition: transform 0.2s ease, box-shadow 0.2s ease;
+}
+
+.card .img-thumbnail.rounded-circle:hover {
+  transform: scale(1.02);
+  box-shadow: 0 6px 16px rgba(58, 45, 39, 0.15);
+}
+
+body.dark-theme .card .img-thumbnail.rounded-circle {
+  border-color: var(--color-border-dark);
+  box-shadow: 0 4px 12px rgba(0, 0, 0, 0.2);
+}
+
+body.dark-theme .card .img-thumbnail.rounded-circle:hover {
+  box-shadow: 0 6px 16px rgba(0, 0, 0, 0.3);
+}
+
+/* Profile card header icons */
+.card-header h6 i {
+  opacity: 0.75;
+}
+
+/* Profile form control sizing for better proportions */
+.card-body .form-control,
+.card-body .form-select {
+  font-size: 0.95rem;
+}
+
+/* Profile action buttons row */
+.border-top {
+  border-color: var(--color-border-light) !important;
+}
+
+body.dark-theme .border-top {
+  border-color: var(--color-border-dark) !important;
+}
+
+/* Guest profile placeholder avatar */
+.card .rounded-circle.bg-secondary {
+  opacity: 0.6;
+  transition: opacity 0.2s ease;
+}
+
+.card:hover .rounded-circle.bg-secondary {
+  opacity: 0.75;
+}
+
+/* Profile page responsive adjustments */
+@media (max-width: 991.98px) {
+  .card-body .row.g-3 > [class*="col-"] {
+    margin-bottom: 0;
+  }
+}
+
+@media (max-width: 575.98px) {
+  .card .img-thumbnail.rounded-circle,
+  .card .rounded-circle.bg-secondary {
+    width: 100px !important;
+    height: 100px !important;
+  }
+
+  .card .rounded-circle.bg-secondary i {
+    font-size: 2.5rem !important;
+  }
+}
+
+/* ==========================================================================
+   42. Admin Sidebar Layout
+   ========================================================================== */
+
+/* Admin Layout Wrapper - Two column layout */
+.admin-layout-wrapper {
+  display: flex;
+  min-height: 100vh;
+  position: relative;
+}
+
+/* Admin Sidebar Base Styles */
+.admin-sidebar {
+  position: fixed;
+  top: 0;
+  left: 0;
+  width: 260px;
+  height: 100vh;
+  background-color: var(--color-bg-card-light);
+  border-right: 1px solid var(--color-border-light);
+  z-index: 1040;
+  display: flex;
+  flex-direction: column;
+  transition: transform 0.3s ease, background-color 0.3s ease,
+    border-color 0.3s ease;
+  overflow-y: auto;
+  overflow-x: hidden;
+  box-shadow: 2px 0 10px rgba(58, 45, 39, 0.08);
+}
+
+/* Sidebar Header */
+.sidebar-header {
+  display: flex;
+  align-items: center;
+  justify-content: space-between;
+  padding: 1rem 1.25rem;
+  border-bottom: 1px solid var(--color-border-light);
+  min-height: 60px;
+  background-color: rgba(58, 45, 39, 0.03);
+}
+
+/* Sidebar User Info */
+.sidebar-user-info {
+  padding: 0.875rem 1.25rem;
+  border-bottom: 1px solid var(--color-border-light);
+  background-color: rgba(13, 110, 253, 0.05);
+}
+
+.sidebar-user-info .user-type {
+  font-size: 0.75rem;
+  text-transform: uppercase;
+  letter-spacing: 0.5px;
+  color: var(--color-primary);
+  font-weight: 600;
+  margin-bottom: 0.125rem;
+  text-align: center;
+  position: relative;
+  right: 1rem;
+}
+
+.sidebar-user-info .user-name {
+  font-size: 0.9375rem;
+  font-weight: 500;
+  color: var(--color-text-light);
+  text-align: center;
+  position: relative;
+  right: 1rem;
+}
+
+.sidebar-brand {
+  display: flex;
+  align-items: center;
+  gap: 0.5rem;
+  font-size: 1.25rem;
+  font-weight: 600;
+  color: var(--color-text-light);
+  text-decoration: none;
+  transition: color 0.2s ease;
+}
+
+.sidebar-brand:hover {
+  color: var(--color-primary);
+  text-decoration: none;
+}
+
+.sidebar-brand i {
+  font-size: 1.5rem;
+  color: var(--color-primary);
+}
+
+.sidebar-close {
+  background: none;
+  border: none;
+  font-size: 1.25rem;
+  color: var(--color-text-muted-light);
+  cursor: pointer;
+  padding: 0.25rem;
+  line-height: 1;
+  transition: color 0.2s ease;
+}
+
+.sidebar-close:hover {
+  color: var(--color-danger);
+}
+
+/* Sidebar Navigation */
+.sidebar-nav {
+  flex: 1;
+  display: flex;
+  flex-direction: column;
+  padding: 1rem 0;
+}
+
+.sidebar-menu {
+  list-style: none;
+  padding: 0;
+  margin: 0;
+}
+
+.sidebar-item {
+  margin-bottom: 0.125rem;
+}
+
+/* Sidebar Links */
+.sidebar-link {
+  display: flex;
+  align-items: center;
+  gap: 0.75rem;
+  padding: 0.75rem 1.25rem;
+  color: var(--color-text-light);
+  text-decoration: none;
+  font-size: 0.9375rem;
+  font-weight: 500;
+  transition: all 0.2s ease;
+  position: relative;
+  border-left: 3px solid transparent;
+}
+
+.sidebar-link:hover {
+  background-color: rgba(13, 110, 253, 0.08);
+  color: var(--color-primary);
+  text-decoration: none;
+  border-left-color: var(--color-primary);
+}
+
+.sidebar-link.active {
+  background-color: rgba(13, 110, 253, 0.12);
+  color: var(--color-primary);
+  font-weight: 600;
+  border-left-color: var(--color-primary);
+}
+
+.sidebar-link i {
+  font-size: 1rem;
+  width: 20px;
+  text-align: center;
+  opacity: 0.85;
+}
+
+.sidebar-link span {
+  flex: 1;
+}
+
+/* Sidebar Badge */
+.sidebar-badge {
+  font-size: 0.7rem;
+  padding: 0.2em 0.5em;
+  border-radius: 10px;
+  font-weight: 600;
+  margin-left: auto;
+}
+
+/* Submenu Arrow */
+.submenu-arrow {
+  font-size: 0.75rem;
+  transition: transform 0.2s ease;
+  margin-left: auto;
+}
+
+.sidebar-link[aria-expanded="true"] .submenu-arrow {
+  transform: rotate(180deg);
+}
+
+/* Sidebar Submenu */
+.sidebar-submenu {
+  list-style: none;
+  padding: 0;
+  margin: 0;
+  background-color: rgba(58, 45, 39, 0.03);
+}
+
+.sidebar-sublink {
+  display: flex;
+  align-items: center;
+  gap: 0.75rem;
+  padding: 0.625rem 1.25rem 0.625rem 2.75rem;
+  color: var(--color-text-muted-light);
+  text-decoration: none;
+  font-size: 0.875rem;
+  transition: all 0.2s ease;
+  border-left: 3px solid transparent;
+}
+
+.sidebar-sublink:hover {
+  background-color: rgba(13, 110, 253, 0.06);
+  color: var(--color-primary);
+  text-decoration: none;
+}
+
+.sidebar-sublink.active {
+  background-color: rgba(13, 110, 253, 0.1);
+  color: var(--color-primary);
+  font-weight: 600;
+  border-left-color: var(--color-primary);
+}
+
+.sidebar-sublink i {
+  font-size: 0.875rem;
+  width: 18px;
+  text-align: center;
+  opacity: 0.75;
+}
+
+/* Sidebar Divider */
+.sidebar-divider {
+  height: 1px;
+  background-color: var(--color-border-light);
+  margin: 1rem 1.25rem;
+}
+
+/* Sidebar Bottom Menu */
+.sidebar-menu-bottom {
+  margin-top: auto;
+}
+
+/* Sidebar Theme Switcher */
+.sidebar-theme-switcher {
+  display: flex;
+  align-items: center;
+  gap: 0.75rem;
+  padding: 1rem 1.25rem;
+  padding-left: 1.25rem;
+  border-top: 1px solid var(--color-border-light);
+  background-color: rgba(58, 45, 39, 0.03);
+}
+
+.sidebar-theme-switcher .theme-switcher {
+  margin-left: 0;
+}
+
+.sidebar-theme-switcher .theme-label {
+  font-size: 0.875rem;
+  color: var(--color-text-muted-light);
+}
+
+/* Admin Main Content */
+#admin-main-content {
+  flex: 1;
+  margin-left: 260px;
+  min-height: 100vh;
+  transition: margin-left 0.3s ease;
+}
+
+/* Admin Mobile Header */
+.admin-mobile-header {
+  display: none;
+  position: fixed;
+  top: 0;
+  left: 0;
+  right: 0;
+  height: 60px;
+  background-color: var(--color-bg-card-light);
+  border-bottom: 1px solid var(--color-border-light);
+  z-index: 1035;
+  padding: 0 1rem;
+  align-items: center;
+  justify-content: space-between;
+  box-shadow: 0 2px 10px rgba(58, 45, 39, 0.08);
+}
+
+.sidebar-toggle {
+  background: none;
+  border: none;
+  font-size: 1.5rem;
+  color: var(--color-text-light);
+  cursor: pointer;
+  padding: 0.25rem;
+  line-height: 1;
+  transition: color 0.2s ease;
+}
+
+.sidebar-toggle:hover {
+  color: var(--color-primary);
+}
+
+.mobile-brand {
+  font-size: 1.125rem;
+  font-weight: 600;
+  color: var(--color-text-light);
+  text-decoration: none;
+  display: flex;
+  align-items: center;
+  gap: 0.5rem;
+}
+
+.mobile-brand:hover {
+  color: var(--color-primary);
+  text-decoration: none;
+}
+
+.mobile-brand i {
+  color: var(--color-primary);
+}
+
+.mobile-actions {
+  display: flex;
+  align-items: center;
+  gap: 0.5rem;
+}
+
+.theme-switcher-mobile {
+  margin-left: 0;
+}
+
+/* Sidebar Overlay for Mobile */
+.sidebar-overlay {
+  position: fixed;
+  top: 0;
+  left: 0;
+  right: 0;
+  bottom: 0;
+  background-color: rgba(0, 0, 0, 0.5);
+  z-index: 1039;
+  opacity: 0;
+  visibility: hidden;
+  transition: opacity 0.3s ease, visibility 0.3s ease;
+}
+
+.sidebar-overlay.show {
+  opacity: 1;
+  visibility: visible;
+}
+
+/* ==========================================================================
+   43. Admin Sidebar Dark Theme
+   ========================================================================== */
+
+body.dark-theme .admin-sidebar {
+  background-color: var(--color-bg-card-dark);
+  border-right-color: var(--color-border-dark);
+  box-shadow: 2px 0 10px rgba(0, 0, 0, 0.2);
+}
+
+body.dark-theme .sidebar-header {
+  border-bottom-color: var(--color-border-dark);
+  background-color: rgba(240, 233, 224, 0.03);
+}
+
+body.dark-theme .sidebar-user-info {
+  border-bottom-color: var(--color-border-dark);
+  background-color: rgba(138, 180, 248, 0.08);
+}
+
+body.dark-theme .sidebar-user-info .user-type {
+  color: #8ab4f8;
+}
+
+body.dark-theme .sidebar-user-info .user-name {
+  color: var(--color-text-dark);
+}
+
+body.dark-theme .sidebar-brand {
+  color: var(--color-text-dark);
+}
+
+body.dark-theme .sidebar-brand:hover {
+  color: #8ab4f8;
+}
+
+body.dark-theme .sidebar-close {
+  color: var(--color-text-muted-dark);
+}
+
+body.dark-theme .sidebar-close:hover {
+  color: #ea868f;
+}
+
+body.dark-theme .sidebar-link {
+  color: var(--color-text-dark);
+}
+
+body.dark-theme .sidebar-link:hover {
+  background-color: rgba(138, 180, 248, 0.08);
+  color: #8ab4f8;
+  border-left-color: #8ab4f8;
+}
+
+body.dark-theme .sidebar-link.active {
+  background-color: rgba(138, 180, 248, 0.12);
+  color: #8ab4f8;
+  border-left-color: #8ab4f8;
+}
+
+body.dark-theme .sidebar-submenu {
+  background-color: rgba(240, 233, 224, 0.03);
+}
+
+body.dark-theme .sidebar-sublink {
+  color: var(--color-text-muted-dark);
+}
+
+body.dark-theme .sidebar-sublink:hover {
+  background-color: rgba(138, 180, 248, 0.06);
+  color: #8ab4f8;
+}
+
+body.dark-theme .sidebar-sublink.active {
+  background-color: rgba(138, 180, 248, 0.1);
+  color: #8ab4f8;
+  border-left-color: #8ab4f8;
+}
+
+body.dark-theme .sidebar-divider {
+  background-color: var(--color-border-dark);
+}
+
+body.dark-theme .sidebar-theme-switcher {
+  border-top-color: var(--color-border-dark);
+  background-color: rgba(240, 233, 224, 0.03);
+}
+
+body.dark-theme .sidebar-theme-switcher .theme-label {
+  color: var(--color-text-muted-dark);
+}
+
+body.dark-theme .admin-mobile-header {
+  background-color: var(--color-bg-card-dark);
+  border-bottom-color: var(--color-border-dark);
+  box-shadow: 0 2px 10px rgba(0, 0, 0, 0.2);
+}
+
+body.dark-theme .sidebar-toggle {
+  color: var(--color-text-dark);
+}
+
+body.dark-theme .sidebar-toggle:hover {
+  color: #8ab4f8;
+}
+
+body.dark-theme .mobile-brand {
+  color: var(--color-text-dark);
+}
+
+body.dark-theme .mobile-brand:hover {
+  color: #8ab4f8;
+}
+
+/* ==========================================================================
+   44. Admin Sidebar Responsive Styles
+   ========================================================================== */
+
+/* Tablet and below - sidebar hidden by default */
+@media (max-width: 991.98px) {
+  .admin-sidebar {
+    transform: translateX(-100%);
+    width: 280px; /* Slightly larger on tablets for better touch targets */
+  }
+
+  .admin-sidebar.show {
+    transform: translateX(0);
+  }
+
+  #admin-main-content {
+    margin-left: 0;
+    padding-top: 60px;
+  }
+
+  /* Ensure main content container adjusts properly */
+  #admin-main-content .container-fluid {
+    padding-left: 1rem;
+    padding-right: 1rem;
+  }
+
+  .admin-mobile-header {
+    display: flex;
+  }
+
+  body.sidebar-open {
+    overflow: hidden;
+  }
+
+  /* Make sidebar links easier to tap on touch devices */
+  .sidebar-link {
+    padding: 0.875rem 1.25rem;
+  }
+
+  .sidebar-sublink {
+    padding: 0.75rem 1.25rem 0.75rem 2.75rem;
+  }
+}
+
+/* Small screens - phones (576px - 767px) */
+@media (max-width: 767.98px) {
+  .admin-sidebar {
+    width: 260px;
+  }
+
+  #admin-main-content .container-fluid {
+    padding-left: 0.75rem;
+    padding-right: 0.75rem;
+  }
+
+  /* Adjust mobile header for smaller screens */
+  .admin-mobile-header {
+    padding: 0 0.75rem;
+  }
+
+  .mobile-brand {
+    font-size: 1rem;
+  }
+
+  /* Make tables horizontally scrollable */
+  .table-responsive {
+    margin-left: -0.75rem;
+    margin-right: -0.75rem;
+    padding-left: 0.75rem;
+    padding-right: 0.75rem;
+  }
+}
+
+/* Extra small screens - small phones (below 576px) */
+@media (max-width: 575.98px) {
+  .admin-sidebar {
+    width: 85vw; /* Take up 85% of viewport width on very small screens */
+    max-width: 280px; /* But never more than 280px */
+  }
+
+  #admin-main-content .container-fluid {
+    padding-left: 0.5rem;
+    padding-right: 0.5rem;
+    padding-top: 1rem;
+    padding-bottom: 1rem;
+  }
+
+  .admin-mobile-header {
+    padding: 0 0.5rem;
+    height: 56px;
+  }
+
+  #admin-main-content {
+    padding-top: 56px;
+  }
+
+  .mobile-brand {
+    font-size: 0.9375rem;
+  }
+
+  .mobile-brand span {
+    display: none; /* Hide text, show only icon on very small screens */
+  }
+
+  .mobile-brand i {
+    font-size: 1.25rem;
+  }
+
+  /* Sidebar adjustments for very small screens */
+  .sidebar-header {
+    padding: 0.875rem 1rem;
+  }
+
+  .sidebar-brand {
+    font-size: 1.125rem;
+  }
+
+  .sidebar-brand i {
+    font-size: 1.25rem;
+  }
+
+  .sidebar-user-info {
+    padding: 0.75rem 1rem;
+  }
+
+  .sidebar-link {
+    padding: 0.75rem 1rem;
+    font-size: 0.9375rem;
+  }
+
+  .sidebar-sublink {
+    padding: 0.625rem 1rem 0.625rem 2.5rem;
+    font-size: 0.875rem;
+  }
+
+  .sidebar-divider {
+    margin: 0.75rem 1rem;
+  }
+
+  .sidebar-theme-switcher {
+    padding: 0.875rem 1rem;
+  }
+
+  /* Cards adjustments */
+  .card {
+    border-radius: 8px;
+  }
+
+  .card-header {
+    padding: 0.75rem 1rem;
+  }
+
+  .card-body {
+    padding: 1rem;
+  }
+
+  /* Table cell padding reduction for very small screens */
+  .table > :not(caption) > * > * {
+    padding: 0.5rem 0.4rem;
+  }
+
+  .table th,
+  .table td {
+    font-size: 0.8125rem;
+  }
+}
+
+/* Safe area insets for notched devices (iPhone X and newer) */
+@supports (padding: env(safe-area-inset-left)) {
+  @media (max-width: 991.98px) {
+    .admin-mobile-header {
+      padding-left: max(0.75rem, env(safe-area-inset-left));
+      padding-right: max(0.75rem, env(safe-area-inset-right));
+      padding-top: env(safe-area-inset-top);
+    }
+
+    #admin-main-content {
+      padding-top: calc(60px + env(safe-area-inset-top));
+    }
+
+    .admin-sidebar {
+      padding-top: env(safe-area-inset-top);
+      padding-bottom: env(safe-area-inset-bottom);
+    }
+
+    .sidebar-header {
+      padding-top: calc(1rem + env(safe-area-inset-top));
+    }
+  }
+
+  @media (max-width: 575.98px) {
+    .admin-mobile-header {
+      padding-left: max(0.5rem, env(safe-area-inset-left));
+      padding-right: max(0.5rem, env(safe-area-inset-right));
+    }
+
+    #admin-main-content {
+      padding-top: calc(56px + env(safe-area-inset-top));
+    }
+
+    #admin-main-content .container-fluid {
+      padding-left: max(0.5rem, env(safe-area-inset-left));
+      padding-right: max(0.5rem, env(safe-area-inset-right));
+      padding-bottom: calc(1rem + env(safe-area-inset-bottom));
+    }
+  }
+}
+
+/* Large screens - ensure sidebar is visible */
+@media (min-width: 992px) {
+  .admin-sidebar {
+    transform: translateX(0);
+  }
+
+  .sidebar-overlay {
+    display: none !important;
+  }
+
+  .admin-mobile-header {
+    display: none !important;
+  }
+
+  /* Sidebar close button should be hidden on desktop */
+  .sidebar-close {
+    display: none !important;
+  }
+}
+
+/* Extra large screens - wider sidebar */
+@media (min-width: 1400px) {
+  .admin-sidebar {
+    width: 280px;
+  }
+
+  #admin-main-content {
+    margin-left: 280px;
+  }
+}
+
+/* Print styles for admin layout */
+@media print {
+  .admin-sidebar {
+    display: none !important;
+  }
+
+  .admin-mobile-header {
+    display: none !important;
+  }
+
+  #admin-main-content {
+    margin-left: 0 !important;
+    padding-top: 0 !important;
+  }
+}
+
+/* ==========================================================================
+   45. Admin Dashboard Mobile Fixes
+   ========================================================================== */
+
+/* Fix for nested container issue in admin dashboards */
+#admin-main-content .container {
+  max-width: 100%;
+  padding-left: 0;
+  padding-right: 0;
+}
+
+/* Dashboard cards responsive adjustments */
+@media (max-width: 767.98px) {
+  /* Stack the monthly income and dashboard columns */
+  #admin-main-content .row.d-flex.align-items-stretch > [class*="col-md-3"],
+  #admin-main-content .row.d-flex.align-items-stretch > [class*="col-md-9"] {
+    margin-bottom: 1rem;
+  }
+
+  /* Quick action buttons - 2 columns on mobile */
+  #admin-main-content .card-body .row > [class*="col-md-3"] {
+    flex: 0 0 50%;
+    max-width: 50%;
+  }
+}
+
+@media (max-width: 575.98px) {
+  /* Quick action buttons - stack on very small screens */
+  #admin-main-content .card-body .row > [class*="col-md-3"] {
+    flex: 0 0 100%;
+    max-width: 100%;
+  }
+
+  /* Monthly income chart height reduction */
+  #monthlyIncomeChart {
+    max-height: 150px !important;
+  }
+}
