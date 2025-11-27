@@ -31,14 +31,17 @@ tr[id^="booking-row-"] {
     <div class="row">
         <div class="col-12">
             <div class="card">
-                <div class="card-header d-flex justify-content-between align-items-center">
+                <div class="card-header d-flex justify-content-between align-items-center flex-wrap gap-2">
                     <h3><i class="fas fa-calendar-check"></i> Unified Booking & Payment Management (<?= $activeBookingCount ?>)</h3>
-                    <div class="d-flex gap-2">
+                    <div class="d-flex gap-2 flex-wrap justify-content-end">
                         <?php if ($pendingPaymentCount > 0): ?>
                             <a href="?controller=payment&action=showPendingPayments<?php echo isset($_GET['resort_id']) ? '&resort_id=' . urlencode($_GET['resort_id']) : ''; ?>" class="btn btn-warning">
                                 <i class="fas fa-exclamation-circle"></i> <?= $pendingPaymentCount ?> Pending Payments
                             </a>
                         <?php endif; ?>
+                        <button type="button" class="btn btn-outline-primary" data-bs-toggle="modal" data-bs-target="#reportModal">
+                            <i class="fas fa-file-download"></i> Generate Report
+                        </button>
                         <a href="?controller=admin&action=dashboard<?php echo isset($_GET['resort_id']) ? '?resort_id=' . urlencode($_GET['resort_id']) : ''; ?>" class="btn btn-secondary">
                             <i class="fas fa-tachometer-alt"></i> Dashboard
                         </a>
@@ -427,6 +430,69 @@ tr[id^="booking-row-"] {
    </div>
 </div>
 
+<!-- Report Generation Modal -->
+<div class="modal fade" id="reportModal" tabindex="-1" aria-labelledby="reportModalLabel" aria-hidden="true">
+    <div class="modal-dialog">
+        <div class="modal-content">
+            <form method="POST" action="?controller=admin&action=generateBookingReport" target="_blank">
+                <div class="modal-header">
+                    <h5 class="modal-title" id="reportModalLabel">
+                        <i class="fas fa-file-pdf me-2"></i>Generate Booking & Payment Report
+                    </h5>
+                    <button type="button" class="btn-close" data-bs-dismiss="modal" aria-label="Close"></button>
+                </div>
+                <div class="modal-body">
+                    <div class="alert alert-info">
+                        <strong>Tip:</strong> Select a date range and optional filters to download a PDF summary of bookings and payments.
+                    </div>
+                    <div class="mb-3">
+                        <label for="report-start-date" class="form-label">Start Date</label>
+                        <input type="date" class="form-control" id="report-start-date" name="start_date" value="<?= date('Y-m-01') ?>" required>
+                    </div>
+                    <div class="mb-3">
+                        <label for="report-end-date" class="form-label">End Date</label>
+                        <input type="date" class="form-control" id="report-end-date" name="end_date" value="<?= date('Y-m-t') ?>" required>
+                    </div>
+                    <div class="mb-3">
+                        <label class="form-label">Resort (optional)</label>
+                        <select name="resort_id" class="form-select">
+                            <option value="">All Resorts</option>
+                            <?php foreach ($resorts as $resort): ?>
+                                <option value="<?= $resort->resortId ?>"><?= htmlspecialchars($resort->name) ?></option>
+                            <?php endforeach; ?>
+                        </select>
+                    </div>
+                    <div class="mb-3">
+                        <label class="form-label">Booking Status</label>
+                        <select name="status" class="form-select">
+                            <option value="">All</option>
+                            <option value="Pending">Pending</option>
+                            <option value="Confirmed">Confirmed</option>
+                            <option value="Completed">Completed</option>
+                            <option value="Cancelled">Cancelled</option>
+                        </select>
+                    </div>
+                    <div class="mb-3">
+                        <label class="form-label">Payment Status</label>
+                        <select name="payment_status" class="form-select">
+                            <option value="">All</option>
+                            <option value="Paid">Paid</option>
+                            <option value="Partial">Partial</option>
+                            <option value="Unpaid">Unpaid</option>
+                        </select>
+                    </div>
+                </div>
+                <div class="modal-footer">
+                    <button type="button" class="btn btn-secondary" data-bs-dismiss="modal">Cancel</button>
+                    <button type="submit" class="btn btn-primary">
+                        <i class="fas fa-file-export me-1"></i> Download PDF
+                    </button>
+                </div>
+            </form>
+        </div>
+    </div>
+</div>
+
 <?php require_once __DIR__ . '/../partials/footer.php'; ?>
 
 <script>
@@ -605,6 +671,21 @@ document.addEventListener('DOMContentLoaded', function() {
                     }
                 }
             });
+        });
+    }
+
+    const reportModalForm = document.querySelector('#reportModal form');
+    if (reportModalForm) {
+        reportModalForm.addEventListener('submit', function(e) {
+            const startInput = document.getElementById('report-start-date');
+            const endInput = document.getElementById('report-end-date');
+            if (startInput && endInput && startInput.value && endInput.value) {
+                if (endInput.value < startInput.value) {
+                    e.preventDefault();
+                    alert('End date must be on or after the start date.');
+                    endInput.focus();
+                }
+            }
         });
     }
 });

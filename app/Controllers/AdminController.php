@@ -1261,6 +1261,211 @@ class AdminController {
     }
 
     /**
+     * Generate PDF report for bookings and payments
+     */
+    public function generateBookingReport() {
+        if (!isset($_SESSION['user_id']) || $_SESSION['role'] !== 'Admin') {
+            header('Location: index.php?action=loginAdmin');
+            exit();
+        }
+
+        if (!User::hasAdminPermission($_SESSION['user_id'], 'booking_management')) {
+            http_response_code(403);
+            require_once __DIR__ . '/../Views/errors/403.php';
+            exit();
+        }
+
+        if ($_SERVER['REQUEST_METHOD'] !== 'POST') {
+            header('Location: ?controller=admin&action=unifiedBookingManagement');
+            exit();
+        }
+
+        $startDateInput = filter_input(INPUT_POST, 'start_date', FILTER_UNSAFE_RAW);
+        $endDateInput = filter_input(INPUT_POST, 'end_date', FILTER_UNSAFE_RAW);
+        $resortId = filter_input(INPUT_POST, 'resort_id', FILTER_VALIDATE_INT);
+        $status = filter_input(INPUT_POST, 'status', FILTER_UNSAFE_RAW);
+        $paymentStatus = filter_input(INPUT_POST, 'payment_status', FILTER_UNSAFE_RAW);
+
+        $startDate = DateTime::createFromFormat('Y-m-d', $startDateInput ?: '');
+        $endDate = DateTime::createFromFormat('Y-m-d', $endDateInput ?: '');
+
+        if (!$startDate || !$endDate) {
+            $_SESSION['error_message'] = 'Please provide a valid start and end date for the report.';
+            header('Location: ?controller=admin&action=unifiedBookingManagement');
+            exit();
+        }
+
+        if ($endDate < $startDate) {
+            $_SESSION['error_message'] = 'End date must be on or after the start date.';
+            header('Location: ?controller=admin&action=unifiedBookingManagement');
+            exit();
+        }
+
+        $filters = [
+            'resort_id' => $resortId,
+            'status' => $status,
+            'payment_status' => $paymentStatus,
+            'start_date' => $startDate->format('Y-m-d'),
+            'end_date' => $endDate->format('Y-m-d')
+        ];
+
+        $bookings = Booking::getBookingsWithPaymentDetails($filters);
+
+        $totals = [
+            'count' => count($bookings),
+            'amount' => 0,
+            'paid' => 0,
+            'balance' => 0
+        ];
+
+        foreach ($bookings as $booking) {
+            $totals['amount'] += (float) ($booking->TotalAmount ?? 0);
+            $totals['paid'] += (float) ($booking->TotalPaid ?? 0);
+            $totals['balance'] += (float) ($booking->RemainingBalance ?? 0);
+        }
+
+        $generatedBy = $_SESSION['user_name'] ?? ($_SESSION['username'] ?? 'Administrator');
+
+        $resortName = 'All Resorts';
+        if ($resortId) {
+            $resort = Resort::findById($resortId);
+            if ($resort) {
+                $resortName = $resort->name;
+            }
+        }
+
+        $meta = [
+            'startDate' => $startDate->format('F j, Y'),
+            'endDate' => $endDate->format('F j, Y'),
+            'generatedAt' => date('F j, Y g:i A'),
+            'generatedBy' => $generatedBy,
+            'resort' => $resortName,
+            'status' => $status ?: 'All',
+            'payment_status' => $paymentStatus ?: 'All',
+            'totals' => $totals
+        ];
+
+        $html = $this->buildBookingReportHtml($bookings, $meta);
+
+        require_once __DIR__ . '/../../vendor/autoload.php';
+        $options = new \Dompdf\Options();
+        $options->set('isRemoteEnabled', true);
+        $options->set('defaultFont', 'DejaVu Sans');
+        $dompdf = new \Dompdf\Dompdf($options);
+        $dompdf->setPaper('A4', 'landscape');
+        $dompdf->loadHtml($html);
+        $dompdf->render();
+        $filename = 'booking_report_' . $startDate->format('Ymd') . '_to_' . $endDate->format('Ymd') . '.pdf';
+        $dompdf->stream($filename, ['Attachment' => 0]);
+        exit();
+    }
+
+    private function buildBookingReportHtml($bookings, $meta) {
+        ob_start();
+        ?>
+        <!DOCTYPE html>
+        <html lang="en">
+        <head>
+            <meta charset="UTF-8">
+            <title>Booking & Payment Report</title>
+            <style>
+                body { font-family: 'DejaVu Sans', Arial, sans-serif; font-size: 12px; color: #333; margin: 20px; }
+                h1, h2, h3 { margin: 0; }
+                .report-header { text-align: center; margin-bottom: 20px; }
+                .summary-grid { display: flex; flex-wrap: wrap; gap: 16px; margin-bottom: 20px; }
+                .summary-card { flex: 1; min-width: 180px; border: 1px solid #ccc; border-radius: 6px; padding: 12px; background: #f8f9fa; }
+                .summary-card h4 { margin: 0 0 6px 0; font-size: 13px; text-transform: uppercase; color: #555; }
+                .summary-card p { margin: 0; font-size: 16px; font-weight: bold; }
+                table { width: 100%; border-collapse: collapse; margin-bottom: 20px; }
+                th, td { border: 1px solid #ccc; padding: 6px 8px; font-size: 11px; }
+                th { background: #f0f0f0; text-transform: uppercase; letter-spacing: 0.05em; }
+                tbody tr:nth-child(even) { background: #fafafa; }
+                .text-right { text-align: right; }
+                .no-data { padding: 20px; text-align: center; border: 1px dashed #bbb; background: #fcfcfc; }
+                .meta { margin-bottom: 15px; font-size: 11px; }
+                .meta div { margin-bottom: 4px; }
+            </style>
+        </head>
+        <body>
+            <div class="report-header">
+                <h1>Booking & Payment Report</h1>
+                <h3><?= htmlspecialchars($meta['resort']) ?></h3>
+                <p>Coverage: <?= htmlspecialchars($meta['startDate']) ?> - <?= htmlspecialchars($meta['endDate']) ?></p>
+            </div>
+
+            <div class="meta">
+                <div><strong>Generated by:</strong> <?= htmlspecialchars($meta['generatedBy']) ?></div>
+                <div><strong>Generated on:</strong> <?= htmlspecialchars($meta['generatedAt']) ?></div>
+                <div><strong>Booking Status:</strong> <?= htmlspecialchars($meta['status']) ?> | <strong>Payment Status:</strong> <?= htmlspecialchars($meta['payment_status']) ?></div>
+            </div>
+
+            <div class="summary-grid">
+                <div class="summary-card">
+                    <h4>Total Bookings</h4>
+                    <p><?= number_format($meta['totals']['count']) ?></p>
+                </div>
+                <div class="summary-card">
+                    <h4>Total Amount</h4>
+                    <p>&#8369;<?= number_format($meta['totals']['amount'], 2) ?></p>
+                </div>
+                <div class="summary-card">
+                    <h4>Total Paid</h4>
+                    <p>&#8369;<?= number_format($meta['totals']['paid'], 2) ?></p>
+                </div>
+                <div class="summary-card">
+                    <h4>Remaining Balance</h4>
+                    <p>&#8369;<?= number_format($meta['totals']['balance'], 2) ?></p>
+                </div>
+            </div>
+
+            <?php if (!empty($bookings)): ?>
+            <table>
+                <thead>
+                    <tr>
+                        <th>ID</th>
+                        <th>Booking Date</th>
+                        <th>Customer</th>
+                        <th>Resort</th>
+                        <th>Timeframe</th>
+                        <th>Booking Status</th>
+                        <th>Payment Status</th>
+                        <th class="text-right">Total Amount</th>
+                        <th class="text-right">Paid</th>
+                        <th class="text-right">Balance</th>
+                    </tr>
+                </thead>
+                <tbody>
+                    <?php foreach ($bookings as $booking): ?>
+                        <tr>
+                            <td>#<?= htmlspecialchars($booking->BookingID) ?></td>
+                            <td><?= date('M d, Y', strtotime($booking->BookingDate)) ?></td>
+                            <td>
+                                <?= htmlspecialchars($booking->CustomerName) ?><br>
+                                <small><?= htmlspecialchars($booking->CustomerEmail) ?></small>
+                            </td>
+                            <td><?= htmlspecialchars($booking->ResortName) ?></td>
+                            <td><?= htmlspecialchars(Booking::getTimeSlotDisplay($booking->TimeSlotType ?? '')) ?></td>
+                            <td><?= htmlspecialchars($booking->Status) ?></td>
+                            <td><?= htmlspecialchars($booking->PaymentStatus) ?></td>
+                            <td class="text-right">&#8369;<?= number_format($booking->TotalAmount ?? 0, 2) ?></td>
+                            <td class="text-right">&#8369;<?= number_format($booking->TotalPaid ?? 0, 2) ?></td>
+                            <td class="text-right">&#8369;<?= number_format($booking->RemainingBalance ?? 0, 2) ?></td>
+                        </tr>
+                    <?php endforeach; ?>
+                </tbody>
+            </table>
+            <?php else: ?>
+                <div class="no-data">
+                    No bookings found for the selected criteria.
+                </div>
+            <?php endif; ?>
+        </body>
+        </html>
+        <?php
+        return ob_get_clean();
+    }
+
+    /**
      * Update booking with payment information
      */
     public function updateBookingPayment() {

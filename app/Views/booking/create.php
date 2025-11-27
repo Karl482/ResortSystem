@@ -523,8 +523,11 @@ $selectedFacilityId = filter_input(INPUT_GET, 'facility_id', FILTER_VALIDATE_INT
                 <h6>8. Acceptance of Terms</h6>
                 <p>By checking the "I accept the Terms and Conditions" box and proceeding with your booking, you acknowledge that you have read, understood, and agree to be bound by all the terms and conditions outlined above.</p>
                 
-                <div id="scroll-notice" class="alert alert-info text-center sticky-bottom mb-0 p-2 rounded-0" role="alert" style="display: none;">
-                    <i class="fas fa-arrow-down me-2"></i>Scroll down to read all terms and enable the checkbox.
+                <div id="scrollNoticeFloating" class="scroll-notice-floating" role="alert" style="display: none;">
+                    <div class="scroll-notice-floating-inner">
+                        <i class="fas fa-arrow-down me-2"></i>
+                        <span>Scroll down to read all terms and enable the checkbox.</span>
+                    </div>
                 </div>
             </div>
             <div class="modal-footer">
@@ -764,6 +767,37 @@ $selectedFacilityId = filter_input(INPUT_GET, 'facility_id', FILTER_VALIDATE_INT
     gap: 0.5rem;
     font-size: 0.95rem;
     color: #6c757d;
+}
+
+/* Floating scroll notice */
+.scroll-notice-floating {
+    position: sticky;
+    bottom: 1rem;
+    z-index: 10;
+    display: flex;
+    justify-content: center;
+    pointer-events: none;
+}
+
+.scroll-notice-floating-inner {
+    pointer-events: auto;
+    background: rgba(13, 110, 253, 0.95);
+    color: #fff;
+    padding: 0.65rem 1.25rem;
+    border-radius: 999px;
+    box-shadow: 0 8px 20px rgba(13, 110, 253, 0.4);
+    font-weight: 600;
+    font-size: 0.95rem;
+    display: inline-flex;
+    align-items: center;
+    gap: 0.35rem;
+    animation: floatPulse 2.5s infinite;
+}
+
+@keyframes floatPulse {
+    0% { transform: translateY(0); box-shadow: 0 8px 20px rgba(13, 110, 253, 0.4); }
+    50% { transform: translateY(-4px); box-shadow: 0 12px 26px rgba(13, 110, 253, 0.5); }
+    100% { transform: translateY(0); box-shadow: 0 8px 20px rgba(13, 110, 253, 0.4); }
 }
 
 /* Resort Grid */
@@ -2373,7 +2407,7 @@ document.addEventListener('DOMContentLoaded', function() {
         const termsCheckbox = document.getElementById('termsCheckbox');
         const acceptTermsBtn = document.getElementById('acceptTermsBtn');
         const modalBody = termsModal.querySelector('.modal-body');
-        const scrollNotice = document.getElementById('scroll-notice');
+        const scrollNotice = document.getElementById('scrollNoticeFloating');
         
         termsModal.addEventListener('show.bs.modal', function() {
             // Reset state

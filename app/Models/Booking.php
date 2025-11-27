@@ -664,6 +664,16 @@ class Booking {
             $sql .= " AND YEAR(b.BookingDate) = :year";
             $params[':year'] = $filters['year'];
         }
+
+        if (!empty($filters['start_date'])) {
+            $sql .= " AND b.BookingDate >= :startDate";
+            $params[':startDate'] = $filters['start_date'];
+        }
+
+        if (!empty($filters['end_date'])) {
+            $sql .= " AND b.BookingDate <= :endDate";
+            $params[':endDate'] = $filters['end_date'];
+        }
         
         $sql .= " GROUP BY b.BookingID";
 
