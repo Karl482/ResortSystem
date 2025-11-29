@@ -574,8 +574,12 @@ class UserController {
             $password = $_POST['password'];
             $confirmPassword = $_POST['confirm_password'];
 
+            // Notification preferences: read submitted 0/1 values (hidden inputs + checkbox)
+            $notifyOnNewReservation = isset($_POST['notify_new_reservation']) ? (int)$_POST['notify_new_reservation'] : 0;
+            $notifyOnReservationUpdate = isset($_POST['notify_reservation_update']) ? (int)$_POST['notify_reservation_update'] : 0;
+
             // Update user details
-            $result = User::update($userId, $username, $email, $firstName, $lastName, $phoneNumber, null, $socials, $profileImageURL);
+            $result = User::update($userId, $username, $email, $firstName, $lastName, $phoneNumber, null, $socials, $profileImageURL, $notifyOnNewReservation, $notifyOnReservationUpdate);
 
             if ($result) {
                 // Update the session variables

@@ -163,13 +163,21 @@ class PaymentController {
         $result = Payment::verifyPayment($paymentId, $_SESSION['user_id']);
 
         if ($result['success']) {
-            // Payment verification successful - try to send confirmation email
+            // Payment verification successful - send confirmation emails
             $payment = Payment::findById($paymentId);
             if ($payment) {
+                // Send payment verification email
                 AsyncHelper::triggerEmailWorker('payment_verified', $payment->bookingId);
+                
+                // Also send status change notification if status changed
+                if (isset($result['statusChanged']) && $result['statusChanged'] && isset($result['oldStatus'])) {
+                    require_once __DIR__ . '/../Helpers/Notification.php';
+                    Notification::sendBookingStatusChangeNotification($payment->bookingId, $result['oldStatus'], $result['newStatus']);
+                }
+                
                 $_SESSION['success_message'] = "Payment for Booking #" . $payment->bookingId . " verified. The booking is now Confirmed.";
             } else {
-                $_SESSION['success_message'] = "Payment verified successfully, but could not retrieve booking details.";
+                $_SESSION['success_message'] = "Payment verified successfully, but could not retrieve payment details.";
             }
         } else {
             $_SESSION['error_message'] = "Failed to verify payment: " . ($result['error'] ?? 'An unknown error occurred.');

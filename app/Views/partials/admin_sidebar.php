@@ -96,8 +96,7 @@ function isDropdownActive($items, $currentController, $currentAction) {
                 <?php 
                 $bookingItems = [
                     ['controller' => 'admin', 'action' => 'unifiedBookingManagement'],
-                    ['controller' => 'payment', 'action' => 'showPendingPayments'],
-                    ['controller' => 'admin', 'action' => 'showOnSiteBookingForm']
+                    ['controller' => 'payment', 'action' => 'showPendingPayments']
                 ];
                 $isBookingActive = isDropdownActive($bookingItems, $currentController, $currentAction);
                 ?>
@@ -131,15 +130,6 @@ function isDropdownActive($items, $currentController, $currentAction) {
                                 <?php endif; ?>
                             </a>
                         </li>
-                        <?php if ($isMainAdmin): ?>
-                        <li>
-                            <a class="sidebar-sublink <?= isNavActive('admin', 'showOnSiteBookingForm', $currentController, $currentAction) ? 'active' : '' ?>" 
-                               href="?controller=admin&action=showOnSiteBookingForm">
-                                <i class="fas fa-store"></i>
-                                <span>On-Site Booking</span>
-                            </a>
-                        </li>
-                        <?php endif; ?>
                     </ul>
                 </li>
             <?php endif; ?>
@@ -251,7 +241,6 @@ function isDropdownActive($items, $currentController, $currentAction) {
                 <?php 
                 $systemItems = [
                     ['controller' => 'admin', 'action' => 'users'],
-                    ['controller' => 'admin', 'action' => 'emailTemplates'],
                     ['controller' => 'admin', 'action' => 'previewFacilities']
                 ];
                 $isSystemActive = isDropdownActive($systemItems, $currentController, $currentAction);
@@ -273,13 +262,7 @@ function isDropdownActive($items, $currentController, $currentAction) {
                                 <span>Manage Users</span>
                             </a>
                         </li>
-                        <li>
-                            <a class="sidebar-sublink <?= isNavActive('admin', 'emailTemplates', $currentController, $currentAction) ? 'active' : '' ?>" 
-                               href="?controller=admin&action=emailTemplates">
-                                <i class="fas fa-envelope"></i>
-                                <span>Email Templates</span>
-                            </a>
-                        </li>
+                        <!-- Email Templates removed per admin UI update -->
                         <?php if (User::hasAdminPermission($_SESSION['user_id'], 'preview_customer')): ?>
                         <li>
                             <a class="sidebar-sublink <?= isNavActive('admin', 'previewFacilities', $currentController, $currentAction) ? 'active' : '' ?>" 
@@ -300,6 +283,17 @@ function isDropdownActive($items, $currentController, $currentAction) {
                    href="?controller=admin&action=previewFacilities">
                     <i class="fas fa-eye"></i>
                     <span>Preview Customer</span>
+                </a>
+            </li>
+            <?php endif; ?>
+
+            <?php if ($isStaffRole): ?>
+            <!-- Staff-Only: On-Site Booking -->
+            <li class="sidebar-item">
+                <a class="sidebar-link <?= isNavActive('admin', 'showOnSiteBookingForm', $currentController, $currentAction) ? 'active' : '' ?>"
+                   href="?controller=admin&action=showOnSiteBookingForm">
+                    <i class="fas fa-store"></i>
+                    <span>On-Site Booking</span>
                 </a>
             </li>
             <?php endif; ?>

@@ -160,7 +160,7 @@ class User {
         return $stmt->fetch(PDO::FETCH_ASSOC);
     }
 
-    public static function update($id, $username, $email, $firstName, $lastName, $phoneNumber, $notes = null, $socials = null, $profileImageURL = null) {
+    public static function update($id, $username, $email, $firstName, $lastName, $phoneNumber, $notes = null, $socials = null, $profileImageURL = null, $notifyOnNewReservation = null, $notifyOnReservationUpdate = null) {
         // Check if the new username or email already exists for another user
         $query = "SELECT UserID FROM " . self::$table . " WHERE (Username = :username OR Email = :email) AND UserID != :id";
         $stmt = self::getDB()->prepare($query);
@@ -184,6 +184,14 @@ class User {
 
         if ($profileImageURL !== null) {
             $fields['ProfileImageURL'] = $profileImageURL;
+        }
+
+        // Optional notification preferences
+        if ($notifyOnNewReservation !== null) {
+            $fields['NotifyOnNewReservation'] = $notifyOnNewReservation ? 1 : 0;
+        }
+        if ($notifyOnReservationUpdate !== null) {
+            $fields['NotifyOnReservationUpdate'] = $notifyOnReservationUpdate ? 1 : 0;
         }
 
         $setClauses = [];

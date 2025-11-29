@@ -208,7 +208,12 @@ class Payment {
             // As per requirement, verifying any payment confirms the booking.
             $newStatus = 'Confirmed';
             
-            // Update booking
+            // Check if status changed
+            $statusChanged = ($oldStatus !== $newStatus);
+            
+            // Update booking status and balance
+            // Note: We update status directly here to maintain transaction integrity
+            // Status change notification will be sent from the controller after commit
             $updateStmt = $db->prepare("UPDATE Bookings SET RemainingBalance = ?, Status = ? WHERE BookingID = ?");
             $updateStmt->execute([$newBalance, $newStatus, $booking->bookingId]);
             
@@ -233,7 +238,13 @@ class Payment {
             );
             
             $db->commit();
-            return ['success' => true, 'newStatus' => $newStatus, 'newBalance' => $newBalance];
+            return [
+                'success' => true, 
+                'newStatus' => $newStatus, 
+                'newBalance' => $newBalance,
+                'oldStatus' => $oldStatus,
+                'statusChanged' => $statusChanged
+            ];
             
         } catch (Exception $e) {
             $db->rollback();

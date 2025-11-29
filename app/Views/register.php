@@ -75,7 +75,10 @@ $formContent = function() {
             <input type="tel" class="form-control" id="phoneNumber" name="phoneNumber" value="<?php echo htmlspecialchars($oldInput['phoneNumber'] ?? ''); ?>">
         </div>
         <div class="d-grid mt-4">
-            <button type="submit" class="btn btn-primary">Register</button>
+            <button type="submit" class="btn btn-primary" id="registerSubmitBtn">
+                <span class="btn-text">Register</span>
+                <span class="spinner-border spinner-border-sm d-none" role="status" aria-hidden="true"></span>
+            </button>
         </div>
         <div class="alert alert-danger d-none mt-3" id="gmailInlineAlert"></div>
     </form>
@@ -105,15 +108,34 @@ include __DIR__ . '/partials/auth_layout.php';
                 <div class="alert alert-warning d-none" id="gmailVerificationAlert"></div>
             </div>
             <div class="modal-footer justify-content-between">
-                <button type="button" class="btn btn-link" id="resendGmailCode">Resend code</button>
+                <button type="button" class="btn btn-link" id="resendGmailCode">
+                    <span class="btn-text">Resend code</span>
+                    <span class="spinner-border spinner-border-sm d-none" role="status" aria-hidden="true"></span>
+                </button>
                 <div class="d-flex gap-2">
                     <button type="button" class="btn btn-secondary" data-bs-dismiss="modal">Cancel</button>
-                    <button type="button" class="btn btn-primary" id="submitVerificationCode">Confirm</button>
+                    <button type="button" class="btn btn-primary" id="submitVerificationCode">
+                        <span class="btn-text">Confirm</span>
+                        <span class="spinner-border spinner-border-sm d-none" role="status" aria-hidden="true"></span>
+                    </button>
                 </div>
             </div>
         </div>
     </div>
 </div>
+<style>
+    #registerSubmitBtn .spinner-border,
+    #submitVerificationCode .spinner-border,
+    #resendGmailCode .spinner-border {
+        margin-left: 0.5rem;
+        vertical-align: middle;
+    }
+    #registerSubmitBtn .btn-text,
+    #submitVerificationCode .btn-text,
+    #resendGmailCode .btn-text {
+        display: inline-block;
+    }
+</style>
 <script>
     document.addEventListener('DOMContentLoaded', function () {
         const username = document.getElementById('username');
@@ -131,8 +153,38 @@ include __DIR__ . '/partials/auth_layout.php';
         const gmailEmailDisplay = document.getElementById('gmailEmailDisplay');
         const resendButton = document.getElementById('resendGmailCode');
         const confirmCodeButton = document.getElementById('submitVerificationCode');
+        const registerSubmitBtn = document.getElementById('registerSubmitBtn');
         let pendingEmail = '';
         let gmailRequestInFlight = false;
+
+        function setButtonLoading(button, isLoading, loadingText = null) {
+            if (!button) return;
+            const btnText = button.querySelector('.btn-text');
+            const spinner = button.querySelector('.spinner-border');
+            
+            if (isLoading) {
+                button.disabled = true;
+                if (spinner) spinner.classList.remove('d-none');
+                if (btnText && loadingText) {
+                    btnText.textContent = loadingText;
+                } else if (btnText) {
+                    btnText.style.opacity = '0.7';
+                }
+            } else {
+                button.disabled = false;
+                if (spinner) spinner.classList.add('d-none');
+                if (btnText) {
+                    if (button.id === 'registerSubmitBtn') {
+                        btnText.textContent = 'Register';
+                    } else if (button.id === 'resendGmailCode') {
+                        btnText.textContent = 'Resend code';
+                    } else if (button.id === 'submitVerificationCode') {
+                        btnText.textContent = 'Confirm';
+                    }
+                    btnText.style.opacity = '1';
+                }
+            }
+        }
 
         async function checkIfExists(field, value) {
             const response = await fetch('?controller=validation&action=checkUserExists', {
@@ -207,8 +259,8 @@ include __DIR__ . '/partials/auth_layout.php';
         }
 
         function toggleModalButtons(disabled) {
-            if (resendButton) resendButton.disabled = disabled;
-            if (confirmCodeButton) confirmCodeButton.disabled = disabled;
+            setButtonLoading(resendButton, disabled, disabled ? 'Sending...' : null);
+            setButtonLoading(confirmCodeButton, disabled, disabled ? 'Verifying...' : null);
         }
 
         async function startGmailVerification(showInlineFeedback = true) {
@@ -216,6 +268,7 @@ include __DIR__ . '/partials/auth_layout.php';
                 return;
             }
             gmailRequestInFlight = true;
+            setButtonLoading(registerSubmitBtn, true, 'Sending verification code...');
             toggleModalButtons(true);
             setModalAlert('');
             if (showInlineFeedback) {
@@ -251,6 +304,7 @@ include __DIR__ . '/partials/auth_layout.php';
                 setInlineAlert('Network error. Please try again.');
             } finally {
                 gmailRequestInFlight = false;
+                setButtonLoading(registerSubmitBtn, false);
                 toggleModalButtons(false);
             }
         }
@@ -269,6 +323,9 @@ include __DIR__ . '/partials/auth_layout.php';
                 event.preventDefault();
                 event.stopPropagation();
                 startGmailVerification(true);
+            } else if (form.checkValidity() && !isGmailAddress(email.value)) {
+                // For non-Gmail addresses, show loading on the submit button
+                setButtonLoading(registerSubmitBtn, true, 'Creating account...');
             }
 
             form.classList.add('was-validated');
@@ -315,7 +372,10 @@ include __DIR__ . '/partials/auth_layout.php';
         }
 
         if (resendButton) {
-            resendButton.addEventListener('click', () => startGmailVerification(false));
+            resendButton.addEventListener('click', () => {
+                setButtonLoading(resendButton, true, 'Resending...');
+                startGmailVerification(false);
+            });
         }
     });
 </script>

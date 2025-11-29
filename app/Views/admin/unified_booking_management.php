@@ -39,9 +39,7 @@ tr[id^="booking-row-"] {
                                 <i class="fas fa-exclamation-circle"></i> <?= $pendingPaymentCount ?> Pending Payments
                             </a>
                         <?php endif; ?>
-                        <button type="button" class="btn btn-outline-primary" data-bs-toggle="modal" data-bs-target="#reportModal">
-                            <i class="fas fa-file-download"></i> Generate Report
-                        </button>
+                        <!-- Generate Report moved to Operational Reports -->
                         <a href="?controller=admin&action=dashboard<?php echo isset($_GET['resort_id']) ? '?resort_id=' . urlencode($_GET['resort_id']) : ''; ?>" class="btn btn-secondary">
                             <i class="fas fa-tachometer-alt"></i> Dashboard
                         </a>
@@ -50,7 +48,7 @@ tr[id^="booking-row-"] {
 
                 <!-- Filters -->
                 <div class="card-body border-bottom">
-                    <form method="GET" class="row g-3 align-items-end">
+                    <form id="filterForm" method="GET" class="row g-3 align-items-end">
                         <input type="hidden" name="controller" value="admin">
                         <input type="hidden" name="action" value="unifiedBookingManagement">
                         
@@ -115,11 +113,8 @@ tr[id^="booking-row-"] {
                         </div>
                         
                         <div class="col-lg-2 col-md-12 d-flex align-items-end mt-3 mt-lg-0">
-                            <button type="submit" class="btn btn-primary me-2 w-100">
-                                <i class="fas fa-filter"></i> Filter
-                            </button>
-                            <a href="?controller=admin&action=unifiedBookingManagement" class="btn btn-outline-secondary">
-                                <i class="fas fa-times"></i>
+                            <a href="?controller=admin&action=unifiedBookingManagement" class="btn btn-outline-secondary w-100">
+                                <i class="fas fa-times"></i> Clear Filters
                             </a>
                         </div>
                          <div class="col-12 d-flex justify-content-end mt-2">
@@ -430,68 +425,7 @@ tr[id^="booking-row-"] {
    </div>
 </div>
 
-<!-- Report Generation Modal -->
-<div class="modal fade" id="reportModal" tabindex="-1" aria-labelledby="reportModalLabel" aria-hidden="true">
-    <div class="modal-dialog">
-        <div class="modal-content">
-            <form method="POST" action="?controller=admin&action=generateBookingReport" target="_blank">
-                <div class="modal-header">
-                    <h5 class="modal-title" id="reportModalLabel">
-                        <i class="fas fa-file-pdf me-2"></i>Generate Booking & Payment Report
-                    </h5>
-                    <button type="button" class="btn-close" data-bs-dismiss="modal" aria-label="Close"></button>
-                </div>
-                <div class="modal-body">
-                    <div class="alert alert-info">
-                        <strong>Tip:</strong> Select a date range and optional filters to download a PDF summary of bookings and payments.
-                    </div>
-                    <div class="mb-3">
-                        <label for="report-start-date" class="form-label">Start Date</label>
-                        <input type="date" class="form-control" id="report-start-date" name="start_date" value="<?= date('Y-m-01') ?>" required>
-                    </div>
-                    <div class="mb-3">
-                        <label for="report-end-date" class="form-label">End Date</label>
-                        <input type="date" class="form-control" id="report-end-date" name="end_date" value="<?= date('Y-m-t') ?>" required>
-                    </div>
-                    <div class="mb-3">
-                        <label class="form-label">Resort (optional)</label>
-                        <select name="resort_id" class="form-select">
-                            <option value="">All Resorts</option>
-                            <?php foreach ($resorts as $resort): ?>
-                                <option value="<?= $resort->resortId ?>"><?= htmlspecialchars($resort->name) ?></option>
-                            <?php endforeach; ?>
-                        </select>
-                    </div>
-                    <div class="mb-3">
-                        <label class="form-label">Booking Status</label>
-                        <select name="status" class="form-select">
-                            <option value="">All</option>
-                            <option value="Pending">Pending</option>
-                            <option value="Confirmed">Confirmed</option>
-                            <option value="Completed">Completed</option>
-                            <option value="Cancelled">Cancelled</option>
-                        </select>
-                    </div>
-                    <div class="mb-3">
-                        <label class="form-label">Payment Status</label>
-                        <select name="payment_status" class="form-select">
-                            <option value="">All</option>
-                            <option value="Paid">Paid</option>
-                            <option value="Partial">Partial</option>
-                            <option value="Unpaid">Unpaid</option>
-                        </select>
-                    </div>
-                </div>
-                <div class="modal-footer">
-                    <button type="button" class="btn btn-secondary" data-bs-dismiss="modal">Cancel</button>
-                    <button type="submit" class="btn btn-primary">
-                        <i class="fas fa-file-export me-1"></i> Download PDF
-                    </button>
-                </div>
-            </form>
-        </div>
-    </div>
-</div>
+<!-- Report Generation moved to Operational Reports -->
 
 <?php require_once __DIR__ . '/../partials/footer.php'; ?>
 
@@ -671,6 +605,51 @@ document.addEventListener('DOMContentLoaded', function() {
                     }
                 }
             });
+        });
+    }
+
+    // Auto-submit filters when selections change (debounced) and allow Enter to submit.
+    const filterForm = document.getElementById('filterForm');
+    if (filterForm) {
+        // simple debounce helper
+        function debounce(fn, delay) {
+            let timer = null;
+            return function() {
+                const context = this;
+                const args = arguments;
+                clearTimeout(timer);
+                timer = setTimeout(function() {
+                    fn.apply(context, args);
+                }, delay);
+            };
+        }
+
+        const submitForm = function() {
+            // Preserve the current location of the clear filters link (just submit the form)
+            filterForm.submit();
+        };
+
+        const debouncedSubmit = debounce(submitForm, 250);
+
+        // Submit immediately on select changes, using a short debounce to batch rapid changes
+        const controls = filterForm.querySelectorAll('select');
+        controls.forEach(control => {
+            control.addEventListener('change', function() {
+                debouncedSubmit();
+            });
+        });
+
+        // Allow Enter to submit the form (but avoid interfering with the client-side customer search behavior)
+        filterForm.addEventListener('keydown', function(e) {
+            if (e.key === 'Enter') {
+                const active = document.activeElement;
+                if (active && active.id === 'customerSearchInput') {
+                    // Let the existing client-side search handle this
+                    return;
+                }
+                e.preventDefault();
+                submitForm();
+            }
         });
     }
 

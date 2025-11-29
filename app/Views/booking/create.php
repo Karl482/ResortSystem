@@ -545,6 +545,31 @@ $selectedFacilityId = filter_input(INPUT_GET, 'facility_id', FILTER_VALIDATE_INT
 </div>
 <?php endif; ?>
 
+<!-- Facility Details Modal -->
+<div class="modal fade" id="facilityDetailsModal" tabindex="-1" aria-labelledby="facilityDetailsModalLabel" aria-hidden="true">
+    <div class="modal-dialog modal-dialog-scrollable modal-lg">
+        <div class="modal-content">
+            <div class="modal-header bg-primary text-white">
+                <h5 class="modal-title" id="facilityDetailsModalLabel">
+                    <i class="fas fa-info-circle me-2"></i>Facility Details
+                </h5>
+                <button type="button" class="btn-close btn-close-white" data-bs-dismiss="modal" aria-label="Close"></button>
+            </div>
+            <div class="modal-body">
+                <div id="facilityDetailsContent">
+                    <div class="text-center py-5">
+                        <i class="fas fa-spinner fa-spin fa-2x text-primary"></i>
+                        <p class="mt-3 text-muted">Loading facility details...</p>
+                    </div>
+                </div>
+            </div>
+            <div class="modal-footer">
+                <button type="button" class="btn btn-secondary" data-bs-dismiss="modal">Close</button>
+            </div>
+        </div>
+    </div>
+</div>
+
 <!-- Enhanced Styles -->
 <style>
 /* Wizard Container */
@@ -1317,6 +1342,57 @@ $selectedFacilityId = filter_input(INPUT_GET, 'facility_id', FILTER_VALIDATE_INT
     font-size: 1.1rem;
     font-weight: 700;
     color: #198754;
+}
+
+.view-details-btn {
+    font-size: 0.85rem;
+    padding: 0.4rem 0.75rem;
+    white-space: nowrap;
+    transition: all 0.3s ease;
+}
+
+.view-details-btn:hover {
+    transform: translateY(-2px);
+    box-shadow: 0 2px 8px rgba(13, 110, 253, 0.25);
+}
+
+/* Facility Details Modal */
+.facility-detail-view {
+    animation: fadeIn 0.3s ease;
+}
+
+@keyframes fadeIn {
+    from {
+        opacity: 0;
+        transform: translateY(10px);
+    }
+    to {
+        opacity: 1;
+        transform: translateY(0);
+    }
+}
+
+.facility-detail-header h4 {
+    font-size: 1.5rem;
+    font-weight: 700;
+    color: #212529;
+}
+
+.facility-detail-description h6 {
+    font-size: 0.95rem;
+    font-weight: 600;
+    color: #6c757d;
+    text-transform: uppercase;
+    letter-spacing: 0.5px;
+}
+
+.description-content {
+    line-height: 1.8;
+    color: #495057;
+    padding: 0.75rem;
+    background: #f8f9fa;
+    border-left: 4px solid #0d6efd;
+    border-radius: 0.4rem;
 }
 
 .blocked-badge {
@@ -2221,7 +2297,17 @@ document.addEventListener('DOMContentLoaded', function() {
                         <div class="facility-details">
                             <h5><i class="${facility.icon} me-2"></i>${facility.name}</h5>
                             <p>${facility.shortDescription || ''}</p>
-                            <div class="facility-price">${facility.priceDisplay}</div>
+                            <div class="d-flex justify-content-between align-items-center">
+                                <div class="facility-price">${facility.priceDisplay}</div>
+                                <button type="button" class="btn btn-sm btn-outline-primary view-details-btn" 
+                                        data-facility-id="${facility.facilityId}"
+                                        data-facility-name="${facility.name}"
+                                        data-facility-description="${facility.fullDescription || ''}"
+                                        data-facility-image="${facility.mainPhotoURL}"
+                                        data-facility-icon="${facility.icon}">
+                                    <i class="fas fa-eye me-1"></i>View Details
+                                </button>
+                            </div>
                         </div>
                     </div>
                 </div>
@@ -2230,14 +2316,29 @@ document.addEventListener('DOMContentLoaded', function() {
         
         facilitiesContainer.innerHTML = html;
         
-        // Add event listeners
+        // Add event listeners for checkboxes
         facilitiesContainer.querySelectorAll('.facility-checkbox:not([disabled])').forEach(checkbox => {
             checkbox.addEventListener('change', handleFacilitySelection);
         });
         
+        // Add event listeners for view details buttons
+        facilitiesContainer.querySelectorAll('.view-details-btn').forEach(btn => {
+            btn.addEventListener('click', function(e) {
+                e.stopPropagation();
+                const facilityId = this.dataset.facilityId;
+                const facilityName = this.dataset.facilityName;
+                const facilityDescription = this.dataset.facilityDescription;
+                const facilityImage = this.dataset.facilityImage;
+                const facilityIcon = this.dataset.facilityIcon;
+                
+                showFacilityDetails(facilityId, facilityName, facilityDescription, facilityImage, facilityIcon);
+            });
+        });
+        
+        // Add click event for facility card
         facilitiesContainer.querySelectorAll('.facility-card:not(.blocked)').forEach(card => {
             card.addEventListener('click', function(e) {
-                if (e.target.classList.contains('facility-checkbox')) return;
+                if (e.target.classList.contains('facility-checkbox') || e.target.closest('.view-details-btn')) return;
                 
                 const checkbox = this.querySelector('.facility-checkbox');
                 if (checkbox && !checkbox.disabled) {
@@ -2267,6 +2368,45 @@ document.addEventListener('DOMContentLoaded', function() {
         });
         
         updateUI();
+    }
+
+    function showFacilityDetails(facilityId, facilityName, facilityDescription, facilityImage, facilityIcon) {
+        const modal = new bootstrap.Modal(document.getElementById('facilityDetailsModal'));
+        const detailsContent = document.getElementById('facilityDetailsContent');
+        
+        // Escape HTML to prevent injection
+        const safeName = facilityName.replace(/</g, '&lt;').replace(/>/g, '&gt;');
+        const safeDescription = (facilityDescription || '').replace(/</g, '&lt;').replace(/>/g, '&gt;');
+        
+        // Format description with line breaks
+        const formattedDescription = safeDescription.split('\n').map(line => 
+            `<p class="mb-2">${line || '&nbsp;'}</p>`
+        ).join('');
+        
+        detailsContent.innerHTML = `
+            <div class="facility-detail-view">
+                <div class="text-center mb-4">
+                    <img src="${facilityImage}" alt="${safeName}" class="img-fluid rounded" style="max-height: 300px; object-fit: cover;">
+                </div>
+                
+                <div class="facility-detail-header mb-4">
+                    <h4><i class="${facilityIcon} me-2 text-primary"></i>${safeName}</h4>
+                </div>
+                
+                <div class="facility-detail-description">
+                    <h6 class="text-muted mb-3">Description</h6>
+                    <div class="description-content">
+                        ${formattedDescription || '<p class="text-muted">No description available</p>'}
+                    </div>
+                </div>
+            </div>
+        `;
+        
+        // Update modal title
+        document.getElementById('facilityDetailsModalLabel').innerHTML = 
+            `<i class="fas fa-info-circle me-2"></i>${safeName}`;
+        
+        modal.show();
     }
 
     function updateSummary() {

@@ -243,6 +243,12 @@ class BookingLifecycleManager {
             // Handle status-specific actions
             self::handleStatusSpecificActions($bookingId, $newStatus);
 
+            // Send email notification for status change
+            if ($oldStatus !== $newStatus) {
+                require_once __DIR__ . '/../Helpers/Notification.php';
+                Notification::sendBookingStatusChangeNotification($bookingId, $oldStatus, $newStatus);
+            }
+
             $db->commit();
             return true;
 

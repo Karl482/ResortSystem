@@ -83,12 +83,12 @@ class EmailTemplate
                 'Body' => '<p>Dear Admin,</p><p>A payment has been submitted by {{customer_name}} for booking #{{booking_id}}. Please log in to verify.</p>'
             ],
             'payment_submission_customer' => [
-                'Subject' => 'We Have Received Your Payment',
-                'Body' => '<p>Dear {{customer_name}},</p><p>We have received your payment for booking #{{booking_id}}. We will notify you once it is verified (typically within 24-48 hours).</p>'
+                'Subject' => 'Payment Received - Under Review',
+                'Body' => '<p>Dear {{customer_name}},</p><p>We have received your payment submission for booking #{{booking_id}} and it is currently under review.</p><p><strong>Payment Details:</strong><br>Amount: &#8369;{{payment_amount}}<br>Payment Method: {{payment_method}}<br>Payment Reference: {{payment_reference}}</p><p><strong>Booking Details:</strong><br>Resort: {{resort_name}}<br>Date: {{booking_date}}<br>Time Slot: {{timeslot}}<br>Total Amount: &#8369;{{total_amount}}<br>Remaining Balance: &#8369;{{remaining_balance}}</p><p>Our team will review your payment and notify you once it has been verified (typically within 24-48 hours).</p><p>Thank you,<br>Resort Management Team</p>'
             ],
             'payment_verified' => [
-                'Subject' => 'Booking Confirmed!',
-                'Body' => '<p>Dear {{customer_name}},</p><p>Your payment has been verified and your booking #{{booking_id}} is confirmed! We look forward to seeing you.</p>'
+                'Subject' => 'Payment Verified - Booking Confirmed!',
+                'Body' => '<p>Dear {{customer_name}},</p><p>Great news! Your payment has been verified and your booking #{{booking_id}} is now confirmed.</p><p><strong>Booking Details:</strong><br>Booking ID: #{{booking_id}}<br>Resort: {{resort_name}}<br>Date: {{booking_date}}<br>Time Slot: {{timeslot}}<br>Total Amount: &#8369;{{total_amount}}<br>Remaining Balance: &#8369;{{remaining_balance}}</p><p>We look forward to seeing you on your booking date!</p><p>Thank you,<br>Resort Management Team</p>'
             ],
             'booking_expired' => [
                 'Subject' => 'Your Booking Has Expired',
@@ -97,6 +97,10 @@ class EmailTemplate
            'booking_confirmed_paid' => [
                'Subject' => 'Booking Confirmed and Paid: #{{booking_id}}',
                'Body' => '<p>Dear {{customer_name}},</p><p>An administrator has created a new booking for you for {{resort_name}} on {{booking_date}}. This booking is confirmed and fully paid. We look forward to seeing you!</p>'
+           ],
+           'booking_status_change' => [
+               'Subject' => 'Booking Status Update - #{{booking_id}}',
+               'Body' => '<p>Dear {{customer_name}},</p><p>This is to inform you that your booking status has been updated.</p><p><strong>Booking Details:</strong><br>Booking ID: #{{booking_id}}<br>Resort: {{resort_name}}<br>Date: {{booking_date}}<br>Time Slot: {{timeslot}}<br>Previous Status: {{old_status}}<br>New Status: <strong>{{new_status}}</strong></p><p>Total Amount: &#8369;{{total_amount}}<br>Remaining Balance: &#8369;{{remaining_balance}}</p><p>If you have any questions or concerns, please contact us.</p><p>Thank you,<br>Resort Management Team</p>'
            ]
         ];
     }

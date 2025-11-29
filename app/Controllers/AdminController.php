@@ -2504,28 +2504,11 @@ class AdminController {
     }
     
     public function emailTemplates() {
-        if ($_SESSION['role'] !== 'Admin') {
-            http_response_code(403);
-            require_once __DIR__ . '/../Views/errors/403.php';
-            exit();
-        }
-
-        // Only Main Admin can access email templates
-        if (!User::isMainAdmin($_SESSION['user_id'])) {
-            http_response_code(403);
-            require_once __DIR__ . '/../Views/errors/403.php';
-            exit();
-        }
-
-        $customTemplatesData = EmailTemplate::getAllTemplates();
-        $customTemplates = [];
-        foreach ($customTemplatesData as $template) {
-            $customTemplates[$template['TemplateType']] = $template;
-        }
-
-        $defaultTemplates = EmailTemplate::getDefaults();
-
-        require_once __DIR__ . '/../Views/admin/email_templates.php';
+        // Email templates screen has been removed from the admin UI.
+        // Redirect to dashboard to avoid exposing the view.
+        $_SESSION['error_message'] = 'The Email Templates page is no longer available.';
+        header('Location: ?controller=admin&action=dashboard');
+        exit();
     }
 
     public function updateEmailTemplate() {
@@ -2557,14 +2540,14 @@ class AdminController {
     }
 
     public function showOnSiteBookingForm() {
-        if ($_SESSION['role'] !== 'Admin') {
+        if ($_SESSION['role'] !== 'Admin' && $_SESSION['role'] !== 'Staff') {
             http_response_code(403);
             require_once __DIR__ . '/../Views/errors/403.php';
             exit();
         }
 
-        // Only Main Admin and Booking Admin can access on-site booking
-        if (!User::hasAdminPermission($_SESSION['user_id'], 'onsite_booking')) {
+        // Only staff or main admin can access on-site booking
+        if ($_SESSION['role'] === 'Admin' && !User::isMainAdmin($_SESSION['user_id'])) {
             http_response_code(403);
             require_once __DIR__ . '/../Views/errors/403.php';
             exit();
@@ -2594,7 +2577,7 @@ class AdminController {
             exit;
         }
 
-        if ($_SESSION['role'] !== 'Admin') {
+        if ($_SESSION['role'] !== 'Admin' && $_SESSION['role'] !== 'Staff') {
             $_SESSION['error_message'] = "You are not authorized to perform this action.";
             header('Location: ?controller=admin&action=dashboard');
             exit;

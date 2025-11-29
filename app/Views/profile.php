@@ -87,6 +87,27 @@ require_once __DIR__ . '/partials/header.php';
                                 </div>
                             </div>
                         </div>
+
+                        <!-- Notifications Card -->
+                        <div class="card mb-4">
+                            <div class="card-header">
+                                <h6 class="mb-0"><i class="fas fa-bell me-2"></i>Notifications</h6>
+                            </div>
+                            <div class="card-body">
+                                <div class="form-check form-switch mb-3">
+                                    <!-- Hidden input ensures a value is submitted even when unchecked -->
+                                    <input type="hidden" name="notify_new_reservation" value="0">
+                                    <input class="form-check-input" type="checkbox" id="notifyNewReservation" name="notify_new_reservation" value="1" <?= (!isset($user['NotifyOnNewReservation']) || $user['NotifyOnNewReservation']) ? 'checked' : '' ?> />
+                                    <label class="form-check-label" for="notifyNewReservation">Notify me for new reservation</label>
+                                </div>
+                                <div class="form-check form-switch">
+                                    <!-- Hidden input ensures a value is submitted even when unchecked -->
+                                    <input type="hidden" name="notify_reservation_update" value="0">
+                                    <input class="form-check-input" type="checkbox" id="notifyReservationUpdate" name="notify_reservation_update" value="1" <?= (!isset($user['NotifyOnReservationUpdate']) || $user['NotifyOnReservationUpdate']) ? 'checked' : '' ?> />
+                                    <label class="form-check-label" for="notifyReservationUpdate">Notify me for reservation updates</label>
+                                </div>
+                            </div>
+                        </div>
                         
                         <!-- Security Card -->
                         <div class="card">

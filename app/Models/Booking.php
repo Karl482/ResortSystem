@@ -106,6 +106,15 @@ class Booking {
             
             // Commit transaction
             $db->commit();
+            
+            // Send status change notification for new booking (New → Pending)
+            // This ensures users receive an email when their booking is created with Pending status
+            if ($status === 'Pending') {
+                require_once __DIR__ . '/../Helpers/Notification.php';
+                // Send notification directly (not async) to ensure it's sent
+                Notification::sendBookingStatusChangeNotification($bookingId, null, 'Pending');
+            }
+            
             return $bookingId;
             
         } catch (Exception $e) {
@@ -321,12 +330,30 @@ class Booking {
         return $stmt->execute();
     }
 
-    public static function updateStatus($bookingId, $status) {
+    public static function updateStatus($bookingId, $status, $skipNotification = false) {
         $db = self::getDB();
+        
+        // Get old status before updating
+        $oldStatus = null;
+        if (!$skipNotification) {
+            $booking = self::findById($bookingId);
+            if ($booking) {
+                $oldStatus = $booking->status;
+            }
+        }
+        
         $stmt = $db->prepare("UPDATE Bookings SET Status = :status WHERE BookingID = :bookingId");
         $stmt->bindValue(':status', $status, PDO::PARAM_STR);
         $stmt->bindValue(':bookingId', $bookingId, PDO::PARAM_INT);
-        return $stmt->execute();
+        $result = $stmt->execute();
+        
+        // Send notification if status changed
+        if ($result && !$skipNotification && $oldStatus && $oldStatus !== $status) {
+            require_once __DIR__ . '/../Helpers/Notification.php';
+            Notification::sendBookingStatusChangeNotification($bookingId, $oldStatus, $status);
+        }
+        
+        return $result;
     }
 
     public static function delete($bookingId) {
@@ -826,8 +853,13 @@ class Booking {
             // 1. Update Booking Status
             if ($originalBooking->status !== $updateData['status']) {
                 $oldStatus = $originalBooking->status;
-                self::updateStatus($bookingId, $updateData['status']);
+                // Use skipNotification=true to avoid double notification, we'll send it manually with audit trail
+                self::updateStatus($bookingId, $updateData['status'], true);
                 BookingAuditTrail::logStatusChange($bookingId, $adminUserId, $oldStatus, $updateData['status'], 'Admin booking modification');
+                
+                // Send email notification for status change
+                require_once __DIR__ . '/../Helpers/Notification.php';
+                Notification::sendBookingStatusChangeNotification($bookingId, $oldStatus, $updateData['status']);
             }
 
             // 2. Update Facilities (only if facility_ids is provided)
