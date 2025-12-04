@@ -18,7 +18,7 @@ require_once __DIR__ . '/../partials/header.php';
 
                 <!-- Filters -->
                 <div class="card-body border-bottom">
-                    <form method="GET" class="row g-3 align-items-end">
+                    <form method="GET" id="filterForm" class="row g-3 align-items-end">
                         <input type="hidden" name="controller" value="admin">
                         <input type="hidden" name="action" value="operationalReports">
                         
@@ -83,11 +83,8 @@ require_once __DIR__ . '/../partials/header.php';
                         </div>
                         
                         <div class="col-lg-2 col-md-12 d-flex align-items-end mt-3 mt-lg-0">
-                            <button type="submit" class="btn btn-primary me-2 w-100">
-                                <i class="fas fa-filter"></i> Filter
-                            </button>
-                            <a href="?controller=admin&action=operationalReports" class="btn btn-outline-secondary">
-                                <i class="fas fa-times"></i>
+                            <a href="?controller=admin&action=operationalReports" class="btn btn-outline-secondary w-100">
+                                <i class="fas fa-times"></i> Clear Filters
                             </a>
                         </div>
                     </form>
@@ -304,7 +301,42 @@ document.addEventListener('DOMContentLoaded', function() {
         }
     }
 
-    // Real-time Customer Search Filter
+    // Auto-submit filters when selections change (debounced)
+    const filterForm = document.getElementById('filterForm');
+    if (filterForm) {
+        // simple debounce helper
+        function debounce(fn, delay) {
+            let timer = null;
+            return function() {
+                const context = this;
+                const args = arguments;
+                if (timer) clearTimeout(timer);
+                timer = setTimeout(function() {
+                    fn.apply(context, args);
+                }, delay);
+            };
+        }
+
+        // Get all select elements and customer search input in the filter form
+        const selects = filterForm.querySelectorAll('select');
+        const customerSearchInput = document.getElementById('customerSearchInput');
+
+        // Auto-submit on select change
+        selects.forEach(select => {
+            select.addEventListener('change', debounce(function() {
+                filterForm.submit();
+            }, 300));
+        });
+
+        // For customer search, use a shorter debounce to be more responsive but still avoid too many submissions
+        if (customerSearchInput) {
+            customerSearchInput.addEventListener('input', debounce(function() {
+                filterForm.submit();
+            }, 500));
+        }
+    }
+
+    // Real-time Customer Search Filter (client-side filtering as secondary fallback)
     const customerSearchInput = document.getElementById('customerSearchInput');
     const bookingTableBody = document.querySelector('.table-hover tbody');
 
