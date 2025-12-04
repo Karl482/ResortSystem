@@ -8,3 +8,23 @@
 [2025-11-30 12:34:46] sendBookingConfirmation: sent to kiritokurosakig@gmail.com for booking=2035
 [2025-12-02 03:20:51] sendBookingConfirmation: booking=2036, customer=74, notify_new=1
 [2025-12-02 03:20:56] sendBookingConfirmation: sent to govimaca08@gmail.com for booking=2036
+[2025-12-04 14:31:04] sendPaymentVerificationConfirmation: booking=2036, customer=74, notify_update=1
+[2025-12-04 14:31:08] sendPaymentVerificationConfirmation: sent to govimaca08@gmail.com for booking=2036
+[2025-12-04 14:31:08] sendPaymentVerificationConfirmation: booking=2036, customer=74, notify_update=1
+[2025-12-04 14:31:08] sendPaymentVerificationConfirmation: booking=2036, customer=74, notify_update=1
+[2025-12-04 14:31:13] sendPaymentVerificationConfirmation: booking=2029, customer=73, notify_update=1
+[2025-12-04 14:31:13] sendPaymentVerificationConfirmation: sent to govimaca08@gmail.com for booking=2036
+[2025-12-04 14:31:14] sendPaymentVerificationConfirmation: sent to govimaca08@gmail.com for booking=2036
+[2025-12-04 14:31:20] sendPaymentVerificationConfirmation: sent to kiritokurosakig@gmail.com for booking=2029
+[2025-12-04 14:31:20] sendPaymentVerificationConfirmation: booking=2029, customer=73, notify_update=1
+[2025-12-04 14:31:20] sendPaymentVerificationConfirmation: booking=2029, customer=73, notify_update=1
+[2025-12-04 14:31:20] sendPaymentVerificationConfirmation: booking=2027, customer=73, notify_update=1
+[2025-12-04 14:31:25] sendPaymentVerificationConfirmation: booking=2028, customer=73, notify_update=1
+[2025-12-04 14:31:26] sendPaymentVerificationConfirmation: sent to kiritokurosakig@gmail.com for booking=2029
+[2025-12-04 14:31:27] sendPaymentVerificationConfirmation: sent to kiritokurosakig@gmail.com for booking=2029
+[2025-12-04 14:31:27] sendPaymentVerificationConfirmation: sent to kiritokurosakig@gmail.com for booking=2027
+[2025-12-04 14:31:30] sendPaymentVerificationConfirmation: sent to kiritokurosakig@gmail.com for booking=2028
+[2025-12-04 14:31:33] sendPaymentVerificationConfirmation: booking=1113, customer=69, notify_update=1
+[2025-12-04 14:31:37] sendPaymentVerificationConfirmation: sent to carlmanuelg@yahoo.com for booking=1113
+[2025-12-04 14:31:41] sendPaymentVerificationConfirmation: booking=22, customer=69, notify_update=1
+[2025-12-04 14:31:45] sendPaymentVerificationConfirmation: sent to carlmanuelg@yahoo.com for booking=22

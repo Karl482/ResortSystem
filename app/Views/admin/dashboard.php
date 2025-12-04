@@ -41,30 +41,6 @@ require_once __DIR__ . '/../partials/header.php';
                 <div class="card-body">
                     <div class="row">
                         <div class="col-md-3">
-                            <a href="?controller=admin&action=unifiedBookingManagement<?php echo isset($_GET['resort_id']) ? '&resort_id=' . urlencode($_GET['resort_id']) : ''; ?>" class="btn btn-outline-primary w-100 mb-2 position-relative">
-                                <?php if ($activeBookingCount > 0): ?>
-                                    <span class="badge bg-info position-absolute top-0 start-100 translate-middle">
-                                        <?php echo $activeBookingCount; ?>
-                                        <span class="visually-hidden">active bookings</span>
-                                    </span>
-                                <?php endif; ?>
-                                <i class="fas fa-calendar-check"></i><br>
-                                <small>Unified Booking & Payment</small>
-                            </a>
-                        </div>
-                        <div class="col-md-3">
-                            <a href="?controller=payment&action=showPendingPayments<?php echo isset($_GET['resort_id']) ? '&resort_id=' . urlencode($_GET['resort_id']) : ''; ?>" class="btn btn-outline-info w-100 mb-2 position-relative">
-                                <?php if ($pendingPaymentCount > 0): ?>
-                                    <span class="badge bg-danger position-absolute top-0 start-100 translate-middle">
-                                        <?php echo $pendingPaymentCount; ?>
-                                        <span class="visually-hidden">pending payments</span>
-                                    </span>
-                                <?php endif; ?>
-                                <i class="fas fa-credit-card"></i><br>
-                                <small>Payment Verification</small>
-                            </a>
-                        </div>
-                        <div class="col-md-3">
                             <a href="?controller=admin&action=pricingManagement" class="btn btn-outline-success w-100 mb-2">
                                 <i class="fas fa-tags"></i><br>
                                 <small>Pricing Management</small>
