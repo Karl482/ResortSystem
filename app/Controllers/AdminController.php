@@ -1112,7 +1112,14 @@ class AdminController {
         }
 
         if (BlockedResortAvailability::create($resortId, $blockDate, $reason)) {
-            $_SESSION['success_message'] = "Successfully blocked the date: " . htmlspecialchars($blockDate);
+            // Cancel existing bookings on that date for the resort
+            $affected = Booking::findActiveByResortAndDate($resortId, $blockDate);
+            foreach ($affected as $b) {
+                // Cancel and mark notice pending, actor is current admin
+                Booking::cancelWithNotice($b['BookingID'], $_SESSION['user_id'] ?? null, "Blocked by admin: " . $reason);
+            }
+
+            $_SESSION['success_message'] = "Successfully blocked the date: " . htmlspecialchars($blockDate) . (count($affected) ? " — " . count($affected) . " booking(s) cancelled." : '');
         } else {
             $_SESSION['error_message'] = "Failed to block the date. It may already be blocked.";
         }

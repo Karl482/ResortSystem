@@ -117,11 +117,6 @@ tr[id^="booking-row-"] {
                                 <i class="fas fa-times"></i> Clear Filters
                             </a>
                         </div>
-                         <div class="col-12 d-flex justify-content-end mt-2">
-                            <a href="?controller=admin&action=showOnSiteBookingForm" class="btn btn-success">
-                                <i class="fas fa-plus"></i> On-Site Booking
-                            </a>
-                        </div>
                     </form>
                 </div>
 
@@ -247,11 +242,6 @@ tr[id^="booking-row-"] {
                                                             <li>
                                                                 <button class="dropdown-item" type="button" data-bs-toggle="modal" data-bs-target="#paymentsModal" data-booking-id="<?= $booking->BookingID ?>">
                                                                     <i class="fas fa-credit-card fa-fw me-2"></i>Payments
-                                                                </button>
-                                                            </li>
-                                                            <li>
-                                                                <button class="dropdown-item" type="button" data-bs-toggle="modal" data-bs-target="#onSiteEditModal" data-booking-id="<?= $booking->BookingID ?>">
-                                                                    <i class="fas fa-store fa-fw me-2"></i>On-Site Edit
                                                                 </button>
                                                             </li>
                                                             <li>
@@ -407,24 +397,6 @@ tr[id^="booking-row-"] {
    </div>
 </div>
 
-<!-- On-Site Edit Modal -->
-<div class="modal fade" id="onSiteEditModal" tabindex="-1" aria-labelledby="onSiteEditModalLabel" aria-hidden="true">
-   <div class="modal-dialog modal-lg">
-       <div class="modal-content">
-           <div class="modal-header">
-               <h5 class="modal-title" id="onSiteEditModalLabel">On-Site Edit</h5>
-               <button type="button" class="btn-close" data-bs-dismiss="modal" aria-label="Close"></button>
-           </div>
-           <div class="modal-body">
-               <!-- Content will be loaded via JS -->
-           </div>
-           <div class="modal-footer">
-               <button type="button" class="btn btn-secondary" data-bs-dismiss="modal">Close</button>
-           </div>
-       </div>
-   </div>
-</div>
-
 <!-- Report Generation moved to Operational Reports -->
 
 <?php require_once __DIR__ . '/../partials/footer.php'; ?>
@@ -513,76 +485,6 @@ document.addEventListener('DOMContentLoaded', function() {
    });
 
 
-    const onSiteEditModal = document.getElementById('onSiteEditModal');
-    onSiteEditModal.addEventListener('show.bs.modal', function (event) {
-        const button = event.relatedTarget;
-        const bookingId = button.getAttribute('data-booking-id');
-        const modalBody = onSiteEditModal.querySelector('.modal-body');
-        modalBody.innerHTML = '<div class="text-center"><i class="fas fa-spinner fa-spin fa-2x text-primary"></i><p class="mt-2">Loading booking data...</p></div>';
-        document.getElementById('onSiteEditModalLabel').textContent = 'On-Site Edit for Booking #' + bookingId;
-
-        fetch(`?controller=admin&action=getBookingDetailsForManagement&booking_id=${bookingId}`)
-            .then(response => response.json())
-            .then(data => {
-                if (data.success) {
-                    const booking = data.booking;
-
-                    // Validation
-                    if (booking.status !== 'Confirmed' || booking.remainingBalance > 0) {
-                        modalBody.innerHTML = '<div class="alert alert-danger">On-site edits are only allowed for Confirmed and fully paid bookings.</div>';
-                        return;
-                    }
-
-                    let formHtml = `<form id="onSiteEditForm" method="POST" action="?controller=admin&action=onSiteUpdateBooking">
-                        <input type="hidden" name="booking_id" value="${bookingId}">
-                        <h6>Modify Facilities</h6>
-                        <div id="onSiteFacilitiesSection">Loading facilities...</div>
-                        <div class="modal-footer">
-                            <button type="button" class="btn btn-secondary" data-bs-dismiss="modal">Cancel</button>
-                            <button type="submit" class="btn btn-warning">Apply Edits</button>
-                        </div>
-                    </form>`;
-                    modalBody.innerHTML = formHtml;
-                    
-                    fetchFacilitiesForOnSiteEdit(booking.resortId, booking.BookedFacilities);
-
-                } else {
-                    modalBody.innerHTML = `<div class="alert alert-danger">${data.error}</div>`;
-                }
-            })
-            .catch(error => {
-                console.error('Error fetching booking data:', error);
-                modalBody.innerHTML = '<div class="alert alert-danger">Failed to load booking data.</div>';
-            });
-    });
-
-    function fetchFacilitiesForOnSiteEdit(resortId, bookedFacilities) {
-        const container = document.getElementById('onSiteFacilitiesSection');
-        fetch(`?controller=resort&action=getFacilitiesJson&resort_id=${resortId}`)
-            .then(response => response.json())
-            .then(data => {
-                if (data.success && data.facilities) {
-                    let facilitiesHtml = '';
-                    data.facilities.forEach(facility => {
-                        const isChecked = bookedFacilities.some(bf => bf.facilityId == facility.facilityId);
-                        facilitiesHtml += `<div class="form-check">
-                            <input class="form-check-input" type="checkbox" name="facilities[]" value="${facility.facilityId}" id="onsite_facility_${facility.facilityId}" ${isChecked ? 'checked' : ''}>
-                            <label class="form-check-label" for="onsite_facility_${facility.facilityId}">
-                                ${facility.name} (+₱${parseFloat(facility.rate).toFixed(2)})
-                            </label>
-                        </div>`;
-                    });
-                    container.innerHTML = facilitiesHtml;
-                } else {
-                    container.innerHTML = '<p class="text-muted">No facilities available for this resort.</p>';
-                }
-            })
-            .catch(error => {
-                console.error('Error fetching facilities:', error);
-                container.innerHTML = '<div class="alert alert-danger">Failed to load facilities.</div>';
-            });
-    }
-    
     // Real-time Customer Search Filter
     const customerSearchInput = document.getElementById('customerSearchInput');
     const bookingTableBody = document.querySelector('.table-hover tbody');

@@ -323,6 +323,58 @@ class BookingController {
     }
 
     /**
+     * Return pending cancellation notices for the logged-in customer
+     */
+    public function getPendingCancellationNotices() {
+        header('Content-Type: application/json');
+        if (!isset($_SESSION['user_id'])) {
+            echo json_encode(['success' => false, 'error' => 'not_logged_in']);
+            exit;
+        }
+        $userId = $_SESSION['user_id'];
+        // Log that the endpoint was hit (helps debug missing modal)
+        error_log("[cancellation-notice] getPending called by userId: " . $userId);
+    $db = Booking::getConnection();
+        $stmt = $db->prepare("SELECT b.BookingID, b.ResortID, b.BookingDate, b.CancellationReason, r.Name AS ResortName
+            FROM Bookings b
+            LEFT JOIN Resorts r ON b.ResortID = r.ResortID
+            WHERE b.CustomerID = :userId AND b.CancellationNoticePending = 1 AND b.Status = 'Cancelled'");
+        $stmt->bindValue(':userId', $userId, PDO::PARAM_INT);
+        $stmt->execute();
+        $results = $stmt->fetchAll(PDO::FETCH_ASSOC);
+        error_log("[cancellation-notice] found " . count($results) . " notices for userId: " . $userId);
+        echo json_encode(['success' => true, 'notices' => $results]);
+        exit;
+    }
+
+    public function acknowledgeCancellationNotice() {
+        if ($_SERVER['REQUEST_METHOD'] !== 'POST') {
+            http_response_code(405);
+            exit;
+        }
+        header('Content-Type: application/json');
+        if (!isset($_SESSION['user_id'])) {
+            echo json_encode(['success' => false, 'error' => 'not_logged_in']);
+            exit;
+        }
+        $bookingId = filter_input(INPUT_POST, 'booking_id', FILTER_VALIDATE_INT);
+        if (!$bookingId) {
+            echo json_encode(['success' => false, 'error' => 'invalid_booking']);
+            exit;
+        }
+        require_once __DIR__ . '/../Models/Booking.php';
+        $booking = Booking::findById($bookingId);
+        if (!$booking || $booking->customerId != $_SESSION['user_id']) {
+            echo json_encode(['success' => false, 'error' => 'not_allowed']);
+            exit;
+        }
+        error_log("[cancellation-notice] acknowledge called for bookingId: " . $bookingId . " by userId: " . $_SESSION['user_id']);
+        $res = Booking::setCancellationNoticePending($bookingId, 0);
+        echo json_encode(['success' => (bool)$res]);
+        exit;
+    }
+
+    /**
      * Check availability for resort + timeframe + facilities (Enhanced Phase 6)
      */
     public function checkAvailability() {

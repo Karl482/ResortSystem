@@ -96,17 +96,36 @@
     <script>
     const BASE_URL = '<?= BASE_URL ?>';
 </script>
+<!-- Cancellation Notice Modal -->
+<div class="modal fade" id="cancellationNoticeModal" tabindex="-1" aria-labelledby="cancellationNoticeModalLabel" aria-hidden="true">
+    <div class="modal-dialog">
+        <div class="modal-content">
+            <div class="modal-header">
+                <h5 class="modal-title" id="cancellationNoticeModalLabel">Important: Reservation Cancelled</h5>
+                <button type="button" class="btn-close" data-bs-dismiss="modal" aria-label="Close"></button>
+            </div>
+            <div class="modal-body">
+                <p id="cancellationNoticeMessage">We're sorry — your reservation has been cancelled by the resort. We apologize for the inconvenience.</p>
+                <p id="cancellationNoticeReason" class="text-muted small"></p>
+            </div>
+            <div class="modal-footer">
+                <button type="button" class="btn btn-outline-secondary" id="cancellationCloseBtn">Close</button>
+                <a href="#" id="cancellationRescheduleBtn" class="btn btn-primary">Reschedule</a>
+            </div>
+        </div>
+    </div>
+</div>
 <script>
 document.addEventListener('DOMContentLoaded', function () {
     const resortModalEl = document.getElementById('resortModal');
     const facilityModalEl = document.getElementById('facilityModal');
     const resortMediaGalleryModalEl = document.getElementById('resortMediaGalleryModal');
 
-    if (!resortModalEl || !facilityModalEl || !resortMediaGalleryModalEl) return;
-
-    const resortModal = new bootstrap.Modal(resortModalEl);
-    const facilityModal = new bootstrap.Modal(facilityModalEl);
-    const resortMediaGalleryModal = new bootstrap.Modal(resortMediaGalleryModalEl);
+    // Initialize modal instances only when their elements exist. Do NOT early-return —
+    // we still want to run the cancellation-notice fetch on every page load.
+    const resortModal = resortModalEl ? new bootstrap.Modal(resortModalEl) : null;
+    const facilityModal = facilityModalEl ? new bootstrap.Modal(facilityModalEl) : null;
+    const resortMediaGalleryModal = resortMediaGalleryModalEl ? new bootstrap.Modal(resortMediaGalleryModalEl) : null;
 
     // --- Resort Modal Logic ---
     if (resortModalEl) {
@@ -305,10 +324,10 @@ document.addEventListener('DOMContentLoaded', function () {
                 });
 
             modalFooter.innerHTML = `<a href="?controller=booking&action=showBookingForm&resort_id=${resortId}" class="btn btn-success">Book Resort Experience</a>`;
-        });
+    });
 
-        // Use event delegation for facility and gallery buttons
-        resortModalEl.addEventListener('click', function(event) {
+    // Use event delegation for facility and gallery buttons
+    resortModalEl.addEventListener('click', function(event) {
             const facilityButton = event.target.closest('.view-facility-details');
             const galleryItem = event.target.closest('.resort-gallery-item');
 
@@ -328,6 +347,56 @@ document.addEventListener('DOMContentLoaded', function () {
             }
         });
     }
+
+    // --- Cancellation Notice logic (for customers) ---
+    // Run this on every page load for logged-in users; it must not be skipped
+    // simply because some modal elements are absent.
+    (function handleCancellationNotices() {
+        // Only proceed if user is logged-in as a customer (server-side will return error otherwise)
+        fetch('?controller=booking&action=getPendingCancellationNotices')
+            .then(response => response.json())
+            .then(data => {
+                if (!data || !data.success || !data.notices || data.notices.length === 0) return;
+
+                // Show the first notice (you could iterate if multiple)
+                const notice = data.notices[0];
+                const modalEl = document.getElementById('cancellationNoticeModal');
+                const modal = new bootstrap.Modal(modalEl);
+                document.getElementById('cancellationNoticeMessage').textContent = `We're sorry — your reservation for ${notice.ResortName} on ${notice.BookingDate} was cancelled.`;
+                document.getElementById('cancellationNoticeReason').textContent = notice.CancellationReason || '';
+
+                // Reschedule button redirects to booking form with resort pre-selected
+                const rescheduleBtn = document.getElementById('cancellationRescheduleBtn');
+                rescheduleBtn.setAttribute('href', `?controller=booking&action=showBookingForm&resort_id=${notice.ResortID}`);
+
+                const acknowledge = (bookingId) => {
+                    return fetch('?controller=booking&action=acknowledgeCancellationNotice', {
+                        method: 'POST',
+                        headers: { 'Content-Type': 'application/x-www-form-urlencoded' },
+                        body: `booking_id=${encodeURIComponent(bookingId)}`
+                    }).then(r => r.json());
+                };
+
+                // Close button acknowledges and hides
+                document.getElementById('cancellationCloseBtn').addEventListener('click', function () {
+                    acknowledge(notice.BookingID).finally(() => modal.hide());
+                });
+
+                // Reschedule link should also acknowledge before navigating
+                rescheduleBtn.addEventListener('click', function (e) {
+                    e.preventDefault();
+                    acknowledge(notice.BookingID).finally(() => {
+                        window.location.href = this.getAttribute('href');
+                    });
+                });
+
+                modal.show();
+            })
+            .catch(err => {
+                // ignore errors — this feature is optional and should not break pages
+                console.debug('Cancellation notice fetch failed:', err);
+            });
+    })();
 
     // --- Facility Modal Logic ---
     function populateAndShowFacilityModal(facilityId, resortId) {

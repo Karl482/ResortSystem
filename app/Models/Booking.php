@@ -34,6 +34,13 @@ class Booking {
         return self::$db;
     }
 
+    /**
+     * Public accessor for other classes to get the PDO instance
+     */
+    public static function getConnection() {
+        return self::getDB();
+    }
+
     public static function create(Booking $booking) {
         $db = self::getDB();
         $stmt = $db->prepare(
@@ -270,6 +277,56 @@ class Booking {
 
         $stmt->execute();
         return $stmt->fetchAll(PDO::FETCH_OBJ);
+    }
+
+    /**
+     * Find active bookings (Pending or Confirmed) for a resort on a specific date
+     */
+    public static function findActiveByResortAndDate($resortId, $date) {
+        $db = self::getDB();
+        $stmt = $db->prepare(
+            "SELECT b.* FROM Bookings b WHERE b.ResortID = :resortId AND b.BookingDate = :date AND b.Status IN ('Pending', 'Confirmed')"
+        );
+        $stmt->bindValue(':resortId', $resortId, PDO::PARAM_INT);
+        $stmt->bindValue(':date', $date, PDO::PARAM_STR);
+        $stmt->execute();
+        return $stmt->fetchAll(PDO::FETCH_ASSOC);
+    }
+
+    /**
+     * Cancel booking and mark cancellation notice pending for the customer
+     */
+    public static function cancelWithNotice($bookingId, $actorUserId = null, $reason = null) {
+        $db = self::getDB();
+        // Get current booking
+        $booking = self::findById($bookingId);
+        if (!$booking) return false;
+
+        // Update status to Cancelled (this will trigger notifications)
+        $statusResult = self::updateStatus($bookingId, 'Cancelled', false);
+
+        // Mark the cancellation notice pending and store reason
+        $stmt = $db->prepare("UPDATE Bookings SET CancellationNoticePending = 1, CancellationReason = :reason WHERE BookingID = :bookingId");
+        $stmt->bindValue(':reason', $reason, PDO::PARAM_STR);
+        $stmt->bindValue(':bookingId', $bookingId, PDO::PARAM_INT);
+        $res = $stmt->execute();
+
+        // Log in audit trail
+        if ($actorUserId) {
+            BookingAuditTrail::logStatusChange($bookingId, $actorUserId, $booking->status, 'Cancelled', $reason);
+        } else {
+            BookingAuditTrail::logStatusChange($bookingId, 0, $booking->status, 'Cancelled', $reason);
+        }
+
+        return ($statusResult !== false) && $res;
+    }
+
+    public static function setCancellationNoticePending($bookingId, $value) {
+        $db = self::getDB();
+        $stmt = $db->prepare("UPDATE Bookings SET CancellationNoticePending = :val WHERE BookingID = :bookingId");
+        $stmt->bindValue(':val', $value ? 1 : 0, PDO::PARAM_INT);
+        $stmt->bindValue(':bookingId', $bookingId, PDO::PARAM_INT);
+        return $stmt->execute();
     }
     
 
