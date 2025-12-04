@@ -9,14 +9,6 @@ require_once __DIR__ . '/../partials/header.php';
             <div class="card">
                 <div class="card-header d-flex justify-content-between align-items-center">
                     <h3><i class="fas fa-ban"></i> Advanced Blocking System</h3>
-                    <div class="d-flex gap-2">
-                        <a href="?controller=admin&action=management" class="btn btn-secondary">
-                            <i class="fas fa-building"></i> Resort Management
-                        </a>
-                        <a href="?controller=admin&action=dashboard" class="btn btn-primary">
-                            <i class="fas fa-tachometer-alt"></i> Dashboard
-                        </a>
-                    </div>
                 </div>
 
                 <!-- Resort Selection -->
