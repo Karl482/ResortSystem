@@ -40,9 +40,6 @@ tr[id^="booking-row-"] {
                             </a>
                         <?php endif; ?>
                         <!-- Generate Report moved to Operational Reports -->
-                        <a href="?controller=admin&action=dashboard<?php echo isset($_GET['resort_id']) ? '?resort_id=' . urlencode($_GET['resort_id']) : ''; ?>" class="btn btn-secondary">
-                            <i class="fas fa-tachometer-alt"></i> Dashboard
-                        </a>
                     </div>
                 </div>
 
