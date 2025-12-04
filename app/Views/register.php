@@ -53,7 +53,7 @@ $formContent = function() {
             <label for="email" class="form-label">Email Address</label>
             <input type="email" class="form-control" id="email" name="email" value="<?php echo htmlspecialchars($oldInput['email'] ?? ''); ?>" required>
             <div class="invalid-feedback">Please provide a valid email.</div>
-            <small class="form-text text-muted">Gmail accounts require a quick verification via email.</small>
+            <small class="form-text text-white">Gmail accounts require a quick verification via email.</small>
         </div>
         <div class="mb-3">
             <label for="username" class="form-label">Username</label>
