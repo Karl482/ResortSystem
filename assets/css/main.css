@@ -505,6 +505,11 @@ body.dark-theme .form-label {
   color: var(--color-text-dark);
 }
 
+/* Make the Gmail helper note readable in dark theme */
+body.dark-theme .gmail-note {
+  color: #ffffff !important;
+}
+
 /* Dark theme modals */
 body.dark-theme .modal-content {
   background-color: var(--color-bg-card-dark);
