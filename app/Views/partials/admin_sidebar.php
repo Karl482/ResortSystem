@@ -159,7 +159,7 @@ function isDropdownActive($items, $currentController, $currentAction) {
                             <a class="sidebar-sublink <?= isNavActive('admin', 'management', $currentController, $currentAction) ? 'active' : '' ?>" 
                                href="?controller=admin&action=management">
                                 <i class="fas fa-building"></i>
-                                <span>Resort Haven</span>
+                                <span>Manage Resorts</span>
                             </a>
                         </li>
                         <?php endif; ?>
