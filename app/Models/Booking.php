@@ -677,7 +677,7 @@ class Booking {
     /**
      * PHASE 5: Get bookings with payment details for unified management
      */
-    public static function getBookingsWithPaymentDetails($filters = []) {
+    public static function getBookingsWithPaymentDetails($filters = [], $page = 1, $perPage = 20) {
         $db = self::getDB();
         
         $sql = "SELECT
@@ -788,10 +788,16 @@ class Booking {
 
         $sql .= " ORDER BY b.BookingDate DESC, b.CreatedAt DESC";
         
+        // Add pagination
+        $offset = ($page - 1) * $perPage;
+        $sql .= " LIMIT :limit OFFSET :offset";
+        
         $stmt = $db->prepare($sql);
         foreach ($params as $param => $value) {
             $stmt->bindValue($param, $value);
         }
+        $stmt->bindValue(':limit', (int)$perPage, PDO::PARAM_INT);
+        $stmt->bindValue(':offset', (int)$offset, PDO::PARAM_INT);
         
         $stmt->execute();
         $bookings = $stmt->fetchAll(PDO::FETCH_OBJ);
@@ -808,6 +814,96 @@ class Booking {
         }
 
         return $bookings;
+    }
+
+    /**
+     * Get total count of bookings matching filters (for pagination)
+     */
+    public static function getBookingsCount($filters = []) {
+        $db = self::getDB();
+        
+        $sql = "SELECT COUNT(DISTINCT b.BookingID) as total
+                FROM Bookings b
+                LEFT JOIN Users u ON b.CustomerID = u.UserID
+                LEFT JOIN Resorts r ON b.ResortID = r.ResortID
+                LEFT JOIN (
+                    SELECT
+                        BookingID,
+                        SUM(CASE WHEN Status = 'Verified' THEN Amount ELSE 0 END) as TotalPaid
+                    FROM Payments
+                    GROUP BY BookingID
+                ) p ON b.BookingID = p.BookingID
+                WHERE 1=1";
+
+        $params = [];
+        
+        if (!empty($filters['resort_id'])) {
+            $sql .= " AND b.ResortID = :resortId";
+            $params[':resortId'] = $filters['resort_id'];
+        }
+        
+        // Handle status filtering
+        if (!empty($filters['status']) && $filters['status'] !== 'all') {
+            $sql .= " AND b.Status = :status";
+            $params[':status'] = $filters['status'];
+        } else {
+            $sql .= " AND b.Status != 'Archived'";
+        }
+
+        if (!empty($filters['customer_id'])) {
+            $sql .= " AND b.CustomerID = :customerId";
+            $params[':customerId'] = $filters['customer_id'];
+        }
+
+        if (!empty($filters['month'])) {
+            $sql .= " AND MONTH(b.BookingDate) = :month";
+            $params[':month'] = $filters['month'];
+        }
+
+        if (!empty($filters['year'])) {
+            $sql .= " AND YEAR(b.BookingDate) = :year";
+            $params[':year'] = $filters['year'];
+        }
+
+        if (!empty($filters['start_date'])) {
+            $sql .= " AND b.BookingDate >= :startDate";
+            $params[':startDate'] = $filters['start_date'];
+        }
+
+        if (!empty($filters['end_date'])) {
+            $sql .= " AND b.BookingDate <= :endDate";
+            $params[':endDate'] = $filters['end_date'];
+        }
+
+        if (!empty($filters['customer_name_search'])) {
+            $sql .= " AND u.Username LIKE :customerNameSearch";
+            $params[':customerNameSearch'] = '%' . $filters['customer_name_search'] . '%';
+        }
+
+        // Handle payment status filter
+        if (!empty($filters['payment_status'])) {
+            switch ($filters['payment_status']) {
+                case 'Paid':
+                    $sql .= " AND b.RemainingBalance <= 0 AND b.TotalAmount > 0";
+                    break;
+                case 'Partial':
+                    $sql .= " AND COALESCE(p.TotalPaid, 0) > 0 AND b.RemainingBalance > 0";
+                    break;
+                case 'Unpaid':
+                    $sql .= " AND COALESCE(p.TotalPaid, 0) = 0";
+                    break;
+            }
+        }
+        
+        $stmt = $db->prepare($sql);
+        foreach ($params as $param => $value) {
+            $stmt->bindValue($param, $value);
+        }
+        
+        $stmt->execute();
+        $result = $stmt->fetch(PDO::FETCH_ASSOC);
+        
+        return (int)$result['total'];
     }
 
     /**

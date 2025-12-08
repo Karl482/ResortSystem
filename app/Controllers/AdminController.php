@@ -1257,6 +1257,12 @@ class AdminController {
             exit();
         }
 
+        // Pagination parameters
+        $page = filter_input(INPUT_GET, 'page', FILTER_VALIDATE_INT) ?: 1;
+        $perPage = filter_input(INPUT_GET, 'per_page', FILTER_VALIDATE_INT) ?: 20;
+        $page = max(1, $page); // Ensure page is at least 1
+        $perPage = min(100, max(10, $perPage)); // Between 10 and 100
+
         $filters = [
             'resort_id' => filter_input(INPUT_GET, 'resort_id', FILTER_VALIDATE_INT),
             'status' => filter_input(INPUT_GET, 'status', FILTER_UNSAFE_RAW),
@@ -1269,8 +1275,12 @@ class AdminController {
         $resorts = Resort::findAll();
         $customers = User::findByRole('Customer');
 
-        // Get bookings with payment information
-        $bookings = Booking::getBookingsWithPaymentDetails($filters);
+        // Get total count for pagination
+        $totalBookings = Booking::getBookingsCount($filters);
+        $totalPages = ceil($totalBookings / $perPage);
+
+        // Get bookings with payment information (paginated)
+        $bookings = Booking::getBookingsWithPaymentDetails($filters, $page, $perPage);
 
         // Get pending payment count for notification - filtered by resort
         $pendingPaymentCount = Payment::getPendingPaymentCount($filters['resort_id']);
@@ -1280,6 +1290,14 @@ class AdminController {
 
         // For the view: get total non-completed bookings count for header (separate from filtered $bookings)
         $totalNonCompletedBookings = Booking::getActiveBookingsCountForAdmin($filters['resort_id']);
+
+        // Pagination data
+        $pagination = [
+            'current_page' => $page,
+            'per_page' => $perPage,
+            'total_items' => $totalBookings,
+            'total_pages' => $totalPages
+        ];
 
         require_once __DIR__ . '/../Views/admin/unified_booking_management.php';
     }
