@@ -96,6 +96,12 @@ class FeedbackController {
 
         require_once __DIR__ . '/../Models/Resort.php';
 
+        // Pagination parameters
+        $page = filter_input(INPUT_GET, 'page', FILTER_VALIDATE_INT) ?: 1;
+        $perPage = filter_input(INPUT_GET, 'per_page', FILTER_VALIDATE_INT) ?: 10;
+        $page = max(1, $page);
+        $perPage = min(100, max(10, $perPage));
+
         $resortIdParam = isset($_GET['resort_id']) && trim($_GET['resort_id']) !== '' ? filter_var($_GET['resort_id'], FILTER_VALIDATE_INT) : null;
         $resortsToQuery = null;
         $allResorts = Resort::findAll(); // For the dropdown
@@ -121,8 +127,27 @@ class FeedbackController {
             $resortsToQuery = $resortIdParam;
         }
 
-        $resortFeedbacks = Feedback::findAll($resortsToQuery);
-        $facilityFeedbacks = Feedback::findAllFacilityFeedbacks($resortsToQuery);
+        // Get counts for pagination
+        $totalResortFeedbacks = Feedback::countAll($resortsToQuery);
+        $totalFacilityFeedbacks = Feedback::countAllFacilityFeedbacks($resortsToQuery);
+        
+        // Calculate total pages
+        $resortTotalPages = ceil($totalResortFeedbacks / $perPage);
+        $facilityTotalPages = ceil($totalFacilityFeedbacks / $perPage);
+
+        // Get paginated data
+        $resortFeedbacks = Feedback::findAll($resortsToQuery, $page, $perPage);
+        $facilityFeedbacks = Feedback::findAllFacilityFeedbacks($resortsToQuery, $page, $perPage);
+
+        // Pagination data
+        $pagination = [
+            'current_page' => $page,
+            'per_page' => $perPage,
+            'resort_total' => $totalResortFeedbacks,
+            'resort_pages' => $resortTotalPages,
+            'facility_total' => $totalFacilityFeedbacks,
+            'facility_pages' => $facilityTotalPages
+        ];
 
         require_once __DIR__ . '/../Views/admin/feedback/index.php';
     }

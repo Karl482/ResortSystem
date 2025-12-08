@@ -199,6 +199,12 @@ class AdminController {
             exit();
         }
 
+        // Pagination parameters
+        $page = filter_input(INPUT_GET, 'page', FILTER_VALIDATE_INT) ?: 1;
+        $perPage = filter_input(INPUT_GET, 'per_page', FILTER_VALIDATE_INT) ?: 10;
+        $page = max(1, $page);
+        $perPage = min(100, max(10, $perPage));
+
         $filters = [
             'resort_id' => filter_input(INPUT_GET, 'resort_id', FILTER_VALIDATE_INT),
             'status' => filter_input(INPUT_GET, 'status', FILTER_UNSAFE_RAW),
@@ -210,10 +216,17 @@ class AdminController {
 
         $resorts = Resort::findAll();
         $customers = User::findByRole('Customer');
-        $bookings = Booking::getBookingsWithPaymentDetails($filters);
+        
+        // Get total count for pagination
+        $totalBookings = Booking::getBookingsCount($filters);
+        $totalPages = ceil($totalBookings / $perPage);
 
-        // Calculate summary statistics for the report view
-        $totalBookings = count($bookings);
+        // Get paginated bookings
+        $bookings = Booking::getBookingsWithPaymentDetails($filters, $page, $perPage);
+
+        // Calculate summary statistics for the report view (based on ALL bookings, not just current page)
+        // We need to get all bookings for accurate statistics
+        $allBookings = Booking::getBookingsWithPaymentDetails($filters);
         $totalRevenue = 0;
         $statusCounts = [
             'Pending' => 0,
@@ -222,7 +235,7 @@ class AdminController {
             'Cancelled' => 0,
         ];
 
-        foreach ($bookings as $booking) {
+        foreach ($allBookings as $booking) {
             if ($booking->Status !== 'Cancelled') {
                 $totalRevenue += $booking->TotalAmount;
             }
@@ -230,6 +243,14 @@ class AdminController {
                 $statusCounts[$booking->Status]++;
             }
         }
+
+        // Pagination data
+        $pagination = [
+            'current_page' => $page,
+            'per_page' => $perPage,
+            'total_items' => $totalBookings,
+            'total_pages' => $totalPages
+        ];
 
         require_once __DIR__ . '/../Views/admin/operational_reports.php';
     }
@@ -241,9 +262,36 @@ class AdminController {
             require_once __DIR__ . '/../Views/errors/403.php';
             exit();
         }
-        
-        $users = $this->userModel->findAll();
+
+        // Pagination parameters
+        $page = filter_input(INPUT_GET, 'page', FILTER_VALIDATE_INT) ?: 1;
+        $perPage = filter_input(INPUT_GET, 'per_page', FILTER_VALIDATE_INT) ?: 10;
+        $page = max(1, $page);
+        $perPage = min(100, max(10, $perPage));
+
+        // Filters
+        $filters = [
+            'role' => filter_input(INPUT_GET, 'role', FILTER_UNSAFE_RAW),
+            'is_active' => filter_input(INPUT_GET, 'is_active', FILTER_UNSAFE_RAW),
+            'search' => filter_input(INPUT_GET, 'search', FILTER_UNSAFE_RAW)
+        ];
+
+        // Get total count for pagination
+        $totalUsers = User::countAll($filters);
+        $totalPages = ceil($totalUsers / $perPage);
+
+        // Get paginated users
+        $users = User::findAll($page, $perPage, $filters);
         $resorts = Resort::findAll();
+
+        // Pagination data
+        $pagination = [
+            'current_page' => $page,
+            'per_page' => $perPage,
+            'total_items' => $totalUsers,
+            'total_pages' => $totalPages
+        ];
+
         include __DIR__ . '/../Views/admin/users.php';
     }
 
@@ -1259,7 +1307,7 @@ class AdminController {
 
         // Pagination parameters
         $page = filter_input(INPUT_GET, 'page', FILTER_VALIDATE_INT) ?: 1;
-        $perPage = filter_input(INPUT_GET, 'per_page', FILTER_VALIDATE_INT) ?: 20;
+        $perPage = filter_input(INPUT_GET, 'per_page', FILTER_VALIDATE_INT) ?: 10;
         $page = max(1, $page); // Ensure page is at least 1
         $perPage = min(100, max(10, $perPage)); // Between 10 and 100
 
@@ -1318,11 +1366,30 @@ class AdminController {
             exit();
         }
 
+        // Pagination parameters
+        $page = filter_input(INPUT_GET, 'page', FILTER_VALIDATE_INT) ?: 1;
+        $perPage = filter_input(INPUT_GET, 'per_page', FILTER_VALIDATE_INT) ?: 10;
+        $page = max(1, $page);
+        $perPage = min(100, max(10, $perPage));
+
         $resortId = filter_input(INPUT_GET, 'resort_id', FILTER_VALIDATE_INT);
         require_once __DIR__ . '/../Models/RescheduleRequest.php';
 
-        $requests = RescheduleRequest::getAllPendingRequests($resortId);
+        // Get total count for pagination
+        $totalRequests = RescheduleRequest::countPendingRequests($resortId);
+        $totalPages = ceil($totalRequests / $perPage);
+
+        // Get paginated requests
+        $requests = RescheduleRequest::getAllPendingRequests($resortId, $page, $perPage);
         $resorts = Resort::findAll();
+
+        // Pagination data
+        $pagination = [
+            'current_page' => $page,
+            'per_page' => $perPage,
+            'total_items' => $totalRequests,
+            'total_pages' => $totalPages
+        ];
 
         require_once __DIR__ . '/../Views/admin/reschedule_requests.php';
     }
@@ -3222,6 +3289,12 @@ class AdminController {
             exit();
         }
 
+        // Pagination parameters
+        $page = filter_input(INPUT_GET, 'page', FILTER_VALIDATE_INT) ?: 1;
+        $perPage = filter_input(INPUT_GET, 'per_page', FILTER_VALIDATE_INT) ?: 10;
+        $page = max(1, $page); // Ensure page is at least 1
+        $perPage = min(100, max(10, $perPage)); // Between 10 and 100
+
         $filters = [
             'resort_id' => filter_input(INPUT_GET, 'resort_id', FILTER_VALIDATE_INT),
             'status' => 'Archived', // Only show archived bookings
@@ -3233,8 +3306,22 @@ class AdminController {
         ];
 
         $resorts = Resort::findAll();
-        $bookings = Booking::getBookingsWithPaymentDetails($filters);
-        $archivedCount = count($bookings);
+        
+        // Get total count for pagination
+        $totalBookings = Booking::getBookingsCount($filters);
+        $totalPages = ceil($totalBookings / $perPage);
+
+        // Get bookings with pagination
+        $bookings = Booking::getBookingsWithPaymentDetails($filters, $page, $perPage);
+        $archivedCount = $totalBookings;
+
+        // Pagination data
+        $pagination = [
+            'current_page' => $page,
+            'per_page' => $perPage,
+            'total_items' => $totalBookings,
+            'total_pages' => $totalPages
+        ];
 
         require_once __DIR__ . '/../Views/admin/archived_bookings.php';
     }

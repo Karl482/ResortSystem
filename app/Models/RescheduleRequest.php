@@ -80,7 +80,7 @@ class RescheduleRequest {
     /**
      * Get all pending reschedule requests
      */
-    public static function getAllPendingRequests($resortId = null) {
+    public static function getAllPendingRequests($resortId = null, $page = null, $perPage = null) {
         $db = self::getDB();
         
         $sql = "SELECT rr.*, 
@@ -99,6 +99,43 @@ class RescheduleRequest {
         
         $sql .= " ORDER BY rr.CreatedAt ASC";
         
+        // Add pagination if provided
+        if ($page !== null && $perPage !== null) {
+            $offset = ($page - 1) * $perPage;
+            $sql .= " LIMIT :limit OFFSET :offset";
+        }
+        
+        $stmt = $db->prepare($sql);
+        
+        if ($resortId) {
+            $stmt->bindValue(':resortId', $resortId, PDO::PARAM_INT);
+        }
+        
+        // Bind pagination parameters if provided
+        if ($page !== null && $perPage !== null) {
+            $stmt->bindValue(':limit', (int)$perPage, PDO::PARAM_INT);
+            $stmt->bindValue(':offset', (int)(($page - 1) * $perPage), PDO::PARAM_INT);
+        }
+        
+        $stmt->execute();
+        return $stmt->fetchAll(PDO::FETCH_OBJ);
+    }
+
+    /**
+     * Count all pending reschedule requests
+     */
+    public static function countPendingRequests($resortId = null) {
+        $db = self::getDB();
+        
+        $sql = "SELECT COUNT(*) as total
+                FROM RescheduleRequests rr
+                JOIN Bookings b ON rr.BookingID = b.BookingID
+                WHERE rr.Status = 'Pending'";
+        
+        if ($resortId) {
+            $sql .= " AND b.ResortID = :resortId";
+        }
+        
         $stmt = $db->prepare($sql);
         
         if ($resortId) {
@@ -106,7 +143,9 @@ class RescheduleRequest {
         }
         
         $stmt->execute();
-        return $stmt->fetchAll(PDO::FETCH_OBJ);
+        $result = $stmt->fetch(PDO::FETCH_ASSOC);
+        
+        return (int)$result['total'];
     }
 
     /**

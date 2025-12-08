@@ -209,12 +209,110 @@ require_once __DIR__ . '/../partials/header.php';
                                 </tbody>
                             </table>
                         </div>
+
+                        <!-- Pagination -->
+                        <?php if ($pagination['total_pages'] > 1): ?>
+                            <div class="d-flex justify-content-between align-items-center mt-3 px-3 pb-3">
+                                <div class="text-muted">
+                                    Showing <?= count($bookings) ?> of <?= $pagination['total_items'] ?> bookings
+                                    (Page <?= $pagination['current_page'] ?> of <?= $pagination['total_pages'] ?>)
+                                </div>
+                                <nav aria-label="Report pagination">
+                                    <ul class="pagination mb-0">
+                                        <!-- First Page -->
+                                        <?php if ($pagination['current_page'] > 1): ?>
+                                            <li class="page-item">
+                                                <a class="page-link" href="<?= buildPaginationUrl(1) ?>" aria-label="First">
+                                                    <span aria-hidden="true">&laquo;&laquo;</span>
+                                                </a>
+                                            </li>
+                                            <li class="page-item">
+                                                <a class="page-link" href="<?= buildPaginationUrl($pagination['current_page'] - 1) ?>" aria-label="Previous">
+                                                    <span aria-hidden="true">&laquo;</span>
+                                                </a>
+                                            </li>
+                                        <?php else: ?>
+                                            <li class="page-item disabled">
+                                                <span class="page-link">&laquo;&laquo;</span>
+                                            </li>
+                                            <li class="page-item disabled">
+                                                <span class="page-link">&laquo;</span>
+                                            </li>
+                                        <?php endif; ?>
+
+                                        <!-- Page Numbers -->
+                                        <?php
+                                        $startPage = max(1, $pagination['current_page'] - 2);
+                                        $endPage = min($pagination['total_pages'], $pagination['current_page'] + 2);
+                                        
+                                        for ($i = $startPage; $i <= $endPage; $i++):
+                                        ?>
+                                            <li class="page-item <?= $i === $pagination['current_page'] ? 'active' : '' ?>">
+                                                <a class="page-link" href="<?= buildPaginationUrl($i) ?>"><?= $i ?></a>
+                                            </li>
+                                        <?php endfor; ?>
+
+                                        <!-- Next/Last Page -->
+                                        <?php if ($pagination['current_page'] < $pagination['total_pages']): ?>
+                                            <li class="page-item">
+                                                <a class="page-link" href="<?= buildPaginationUrl($pagination['current_page'] + 1) ?>" aria-label="Next">
+                                                    <span aria-hidden="true">&raquo;</span>
+                                                </a>
+                                            </li>
+                                            <li class="page-item">
+                                                <a class="page-link" href="<?= buildPaginationUrl($pagination['total_pages']) ?>" aria-label="Last">
+                                                    <span aria-hidden="true">&raquo;&raquo;</span>
+                                                </a>
+                                            </li>
+                                        <?php else: ?>
+                                            <li class="page-item disabled">
+                                                <span class="page-link">&raquo;</span>
+                                            </li>
+                                            <li class="page-item disabled">
+                                                <span class="page-link">&raquo;&raquo;</span>
+                                            </li>
+                                        <?php endif; ?>
+                                    </ul>
+                                </nav>
+                            </div>
+
+                            <!-- Per Page Selector -->
+                            <div class="px-3 pb-3">
+                                <div class="d-flex align-items-center gap-2">
+                                    <label for="perPageSelect" class="mb-0 text-muted small">Items per page:</label>
+                                    <select id="perPageSelect" class="form-select form-select-sm" style="width: auto;" onchange="changePerPage(this.value)">
+                                        <option value="10" <?= $pagination['per_page'] == 10 ? 'selected' : '' ?>>10</option>
+                                        <option value="25" <?= $pagination['per_page'] == 25 ? 'selected' : '' ?>>25</option>
+                                        <option value="50" <?= $pagination['per_page'] == 50 ? 'selected' : '' ?>>50</option>
+                                        <option value="100" <?= $pagination['per_page'] == 100 ? 'selected' : '' ?>>100</option>
+                                    </select>
+                                </div>
+                            </div>
+                        <?php endif; ?>
                     <?php endif; ?>
                 </div>
             </div>
         </div>
     </div>
 </div>
+
+<?php
+// Helper function to build pagination URLs preserving filters
+function buildPaginationUrl($page) {
+    $params = $_GET;
+    $params['page'] = $page;
+    return '?' . http_build_query($params);
+}
+?>
+
+<script>
+function changePerPage(perPage) {
+    const params = new URLSearchParams(window.location.search);
+    params.set('per_page', perPage);
+    params.set('page', 1); // Reset to first page when changing per page
+    window.location.search = params.toString();
+}
+</script>
 
 <!-- Report Generation Modal -->
 <div class="modal fade" id="reportModal" tabindex="-1" aria-labelledby="reportModalLabel" aria-hidden="true">

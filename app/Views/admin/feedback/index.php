@@ -123,6 +123,53 @@ require_once __DIR__ . '/../../partials/header.php';
                             </tbody>
                         </table>
                     </div>
+
+                    <!-- Resort Feedback Pagination -->
+                    <?php if ($pagination['resort_pages'] > 1): ?>
+                        <div class="d-flex justify-content-between align-items-center mt-3">
+                            <div class="text-muted small">
+                                Showing <?= count($resortFeedbacks) ?> of <?= $pagination['resort_total'] ?> resort feedbacks
+                                (Page <?= $pagination['current_page'] ?> of <?= $pagination['resort_pages'] ?>)
+                            </div>
+                            <nav aria-label="Resort feedback pagination">
+                                <ul class="pagination pagination-sm mb-0">
+                                    <?php if ($pagination['current_page'] > 1): ?>
+                                        <li class="page-item">
+                                            <a class="page-link" href="<?= buildPaginationUrl(1) ?>">&laquo;&laquo;</a>
+                                        </li>
+                                        <li class="page-item">
+                                            <a class="page-link" href="<?= buildPaginationUrl($pagination['current_page'] - 1) ?>">&laquo;</a>
+                                        </li>
+                                    <?php else: ?>
+                                        <li class="page-item disabled"><span class="page-link">&laquo;&laquo;</span></li>
+                                        <li class="page-item disabled"><span class="page-link">&laquo;</span></li>
+                                    <?php endif; ?>
+
+                                    <?php
+                                    $startPage = max(1, $pagination['current_page'] - 2);
+                                    $endPage = min($pagination['resort_pages'], $pagination['current_page'] + 2);
+                                    for ($i = $startPage; $i <= $endPage; $i++):
+                                    ?>
+                                        <li class="page-item <?= $i === $pagination['current_page'] ? 'active' : '' ?>">
+                                            <a class="page-link" href="<?= buildPaginationUrl($i) ?>"><?= $i ?></a>
+                                        </li>
+                                    <?php endfor; ?>
+
+                                    <?php if ($pagination['current_page'] < $pagination['resort_pages']): ?>
+                                        <li class="page-item">
+                                            <a class="page-link" href="<?= buildPaginationUrl($pagination['current_page'] + 1) ?>">&raquo;</a>
+                                        </li>
+                                        <li class="page-item">
+                                            <a class="page-link" href="<?= buildPaginationUrl($pagination['resort_pages']) ?>">&raquo;&raquo;</a>
+                                        </li>
+                                    <?php else: ?>
+                                        <li class="page-item disabled"><span class="page-link">&raquo;</span></li>
+                                        <li class="page-item disabled"><span class="page-link">&raquo;&raquo;</span></li>
+                                    <?php endif; ?>
+                                </ul>
+                            </nav>
+                        </div>
+                    <?php endif; ?>
                 <?php endif; ?>
             </div>
 
@@ -210,11 +257,91 @@ require_once __DIR__ . '/../../partials/header.php';
                             </tbody>
                         </table>
                     </div>
+
+                    <!-- Facility Feedback Pagination -->
+                    <?php if ($pagination['facility_pages'] > 1): ?>
+                        <div class="d-flex justify-content-between align-items-center mt-3">
+                            <div class="text-muted small">
+                                Showing <?= count($facilityFeedbacks) ?> of <?= $pagination['facility_total'] ?> facility feedbacks
+                                (Page <?= $pagination['current_page'] ?> of <?= $pagination['facility_pages'] ?>)
+                            </div>
+                            <nav aria-label="Facility feedback pagination">
+                                <ul class="pagination pagination-sm mb-0">
+                                    <?php if ($pagination['current_page'] > 1): ?>
+                                        <li class="page-item">
+                                            <a class="page-link" href="<?= buildPaginationUrl(1) ?>">&laquo;&laquo;</a>
+                                        </li>
+                                        <li class="page-item">
+                                            <a class="page-link" href="<?= buildPaginationUrl($pagination['current_page'] - 1) ?>">&laquo;</a>
+                                        </li>
+                                    <?php else: ?>
+                                        <li class="page-item disabled"><span class="page-link">&laquo;&laquo;</span></li>
+                                        <li class="page-item disabled"><span class="page-link">&laquo;</span></li>
+                                    <?php endif; ?>
+
+                                    <?php
+                                    $startPage = max(1, $pagination['current_page'] - 2);
+                                    $endPage = min($pagination['facility_pages'], $pagination['current_page'] + 2);
+                                    for ($i = $startPage; $i <= $endPage; $i++):
+                                    ?>
+                                        <li class="page-item <?= $i === $pagination['current_page'] ? 'active' : '' ?>">
+                                            <a class="page-link" href="<?= buildPaginationUrl($i) ?>"><?= $i ?></a>
+                                        </li>
+                                    <?php endfor; ?>
+
+                                    <?php if ($pagination['current_page'] < $pagination['facility_pages']): ?>
+                                        <li class="page-item">
+                                            <a class="page-link" href="<?= buildPaginationUrl($pagination['current_page'] + 1) ?>">&raquo;</a>
+                                        </li>
+                                        <li class="page-item">
+                                            <a class="page-link" href="<?= buildPaginationUrl($pagination['facility_pages']) ?>">&raquo;&raquo;</a>
+                                        </li>
+                                    <?php else: ?>
+                                        <li class="page-item disabled"><span class="page-link">&raquo;</span></li>
+                                        <li class="page-item disabled"><span class="page-link">&raquo;&raquo;</span></li>
+                                    <?php endif; ?>
+                                </ul>
+                            </nav>
+                        </div>
+                    <?php endif; ?>
                 <?php endif; ?>
             </div>
+
+            <!-- Per Page Selector (applies to both sections) -->
+            <?php if ($pagination['resort_pages'] > 1 || $pagination['facility_pages'] > 1): ?>
+                <div class="mt-3">
+                    <div class="d-flex align-items-center gap-2">
+                        <label for="perPageSelect" class="mb-0 text-muted small">Items per page:</label>
+                        <select id="perPageSelect" class="form-select form-select-sm" style="width: auto;" onchange="changePerPage(this.value)">
+                            <option value="10" <?= $pagination['per_page'] == 10 ? 'selected' : '' ?>>10</option>
+                            <option value="15" <?= $pagination['per_page'] == 15 ? 'selected' : '' ?>>15</option>
+                            <option value="25" <?= $pagination['per_page'] == 25 ? 'selected' : '' ?>>25</option>
+                            <option value="50" <?= $pagination['per_page'] == 50 ? 'selected' : '' ?>>50</option>
+                        </select>
+                    </div>
+                </div>
+            <?php endif; ?>
         </div>
     </div>
 </div>
+
+<?php
+// Helper function to build pagination URLs preserving filters
+function buildPaginationUrl($page) {
+    $params = $_GET;
+    $params['page'] = $page;
+    return '?' . http_build_query($params);
+}
+?>
+
+<script>
+function changePerPage(perPage) {
+    const params = new URLSearchParams(window.location.search);
+    params.set('per_page', perPage);
+    params.set('page', 1);
+    window.location.search = params.toString();
+}
+</script>
 
 <!-- Media Gallery Modal -->
 <div class="modal fade" id="mediaModal" tabindex="-1" aria-labelledby="mediaModalLabel" aria-hidden="true">

@@ -34,6 +34,54 @@ require_once __DIR__ . '/../partials/header.php';
     </div>
 <?php endif; ?>
 
+    <!-- Filters -->
+    <div class="card mb-3">
+        <div class="card-body">
+            <form method="GET" action="" id="filterForm" class="row g-3">
+                <input type="hidden" name="controller" value="admin">
+                <input type="hidden" name="action" value="users">
+                
+                <div class="col-md-3">
+                    <label for="searchInput" class="form-label">Search</label>
+                    <input type="text" class="form-control" id="searchInput" name="search" 
+                           placeholder="Username, email, name..." 
+                           value="<?= htmlspecialchars($_GET['search'] ?? '') ?>">
+                </div>
+
+                <div class="col-md-2">
+                    <label for="roleFilter" class="form-label">Role</label>
+                    <select class="form-select" id="roleFilter" name="role">
+                        <option value="">All Roles</option>
+                        <option value="Customer" <?= (($_GET['role'] ?? '') === 'Customer') ? 'selected' : '' ?>>Customer</option>
+                        <option value="Staff" <?= (($_GET['role'] ?? '') === 'Staff') ? 'selected' : '' ?>>Staff</option>
+                        <option value="Admin" <?= (($_GET['role'] ?? '') === 'Admin') ? 'selected' : '' ?>>Admin</option>
+                    </select>
+                </div>
+
+                <div class="col-md-2">
+                    <label for="statusFilter" class="form-label">Status</label>
+                    <select class="form-select" id="statusFilter" name="is_active">
+                        <option value="all">All Status</option>
+                        <option value="active" <?= (($_GET['is_active'] ?? '') === 'active') ? 'selected' : '' ?>>Active</option>
+                        <option value="inactive" <?= (($_GET['is_active'] ?? '') === 'inactive') ? 'selected' : '' ?>>Inactive</option>
+                    </select>
+                </div>
+
+                <div class="col-md-5 d-flex align-items-end gap-2">
+                    <button type="submit" class="btn btn-primary">
+                        <i class="fas fa-filter"></i> Apply Filters
+                    </button>
+                    <a href="?controller=admin&action=users" class="btn btn-secondary">
+                        <i class="fas fa-redo"></i> Reset
+                    </a>
+                    <div class="ms-auto text-muted">
+                        Total: <?= $pagination['total_items'] ?> users
+                    </div>
+                </div>
+            </form>
+        </div>
+    </div>
+
     <div class="table-responsive">
         <table class="table table-hover align-middle">
             <thead class="table-light">
@@ -49,7 +97,15 @@ require_once __DIR__ . '/../partials/header.php';
                 </tr>
             </thead>
             <tbody>
-                <?php foreach ($users as $user): ?>
+                <?php if (empty($users)): ?>
+                    <tr>
+                        <td colspan="8" class="text-center text-muted py-4">
+                            <i class="fas fa-users fa-3x mb-3 d-block"></i>
+                            No users found matching your filters.
+                        </td>
+                    </tr>
+                <?php else: ?>
+                    <?php foreach ($users as $user): ?>
                 <tr>
                     <td><small class="text-muted">#<?= htmlspecialchars($user['UserID']) ?></small></td>
                     <td>
@@ -185,19 +241,117 @@ require_once __DIR__ . '/../partials/header.php';
                 </td>
             </tr>
             <?php endforeach; ?>
+                <?php endif; ?>
         </tbody>
     </table>
+
+    <!-- Pagination -->
+    <?php if ($pagination['total_pages'] > 1): ?>
+        <div class="d-flex justify-content-between align-items-center mb-3">
+            <div class="text-muted">
+                Showing <?= count($users) ?> of <?= $pagination['total_items'] ?> users
+                (Page <?= $pagination['current_page'] ?> of <?= $pagination['total_pages'] ?>)
+            </div>
+            <nav aria-label="User pagination">
+                <ul class="pagination mb-0">
+                    <!-- First Page -->
+                    <?php if ($pagination['current_page'] > 1): ?>
+                        <li class="page-item">
+                            <a class="page-link" href="<?= buildPaginationUrl(1) ?>" aria-label="First">
+                                <span aria-hidden="true">&laquo;&laquo;</span>
+                            </a>
+                        </li>
+                        <li class="page-item">
+                            <a class="page-link" href="<?= buildPaginationUrl($pagination['current_page'] - 1) ?>" aria-label="Previous">
+                                <span aria-hidden="true">&laquo;</span>
+                            </a>
+                        </li>
+                    <?php else: ?>
+                        <li class="page-item disabled">
+                            <span class="page-link">&laquo;&laquo;</span>
+                        </li>
+                        <li class="page-item disabled">
+                            <span class="page-link">&laquo;</span>
+                        </li>
+                    <?php endif; ?>
+
+                    <!-- Page Numbers -->
+                    <?php
+                    $startPage = max(1, $pagination['current_page'] - 2);
+                    $endPage = min($pagination['total_pages'], $pagination['current_page'] + 2);
+                    
+                    for ($i = $startPage; $i <= $endPage; $i++):
+                    ?>
+                        <li class="page-item <?= $i === $pagination['current_page'] ? 'active' : '' ?>">
+                            <a class="page-link" href="<?= buildPaginationUrl($i) ?>"><?= $i ?></a>
+                        </li>
+                    <?php endfor; ?>
+
+                    <!-- Next/Last Page -->
+                    <?php if ($pagination['current_page'] < $pagination['total_pages']): ?>
+                        <li class="page-item">
+                            <a class="page-link" href="<?= buildPaginationUrl($pagination['current_page'] + 1) ?>" aria-label="Next">
+                                <span aria-hidden="true">&raquo;</span>
+                            </a>
+                        </li>
+                        <li class="page-item">
+                            <a class="page-link" href="<?= buildPaginationUrl($pagination['total_pages']) ?>" aria-label="Last">
+                                <span aria-hidden="true">&raquo;&raquo;</span>
+                            </a>
+                        </li>
+                    <?php else: ?>
+                        <li class="page-item disabled">
+                            <span class="page-link">&raquo;</span>
+                        </li>
+                        <li class="page-item disabled">
+                            <span class="page-link">&raquo;&raquo;</span>
+                        </li>
+                    <?php endif; ?>
+                </ul>
+            </nav>
+        </div>
+
+        <!-- Per Page Selector -->
+        <div class="mb-3">
+            <div class="d-flex align-items-center gap-2">
+                <label for="perPageSelect" class="mb-0 text-muted small">Items per page:</label>
+                <select id="perPageSelect" class="form-select form-select-sm" style="width: auto;" onchange="changePerPage(this.value)">
+                    <option value="10" <?= $pagination['per_page'] == 10 ? 'selected' : '' ?>>10</option>
+                    <option value="20" <?= $pagination['per_page'] == 20 ? 'selected' : '' ?>>20</option>
+                    <option value="50" <?= $pagination['per_page'] == 50 ? 'selected' : '' ?>>50</option>
+                    <option value="100" <?= $pagination['per_page'] == 100 ? 'selected' : '' ?>>100</option>
+                </select>
+            </div>
+        </div>
+    <?php endif; ?>
+
     <button type="button" class="btn btn-primary" data-bs-toggle="modal" data-bs-target="#addUserModal">
         Add New User
     </button>
     <a href="index.php" class="btn btn-secondary">Back to Dashboard</a>
     </div>
 
+    <?php
+    // Helper function to build pagination URLs preserving filters
+    function buildPaginationUrl($page) {
+        $params = $_GET;
+        $params['page'] = $page;
+        return '?' . http_build_query($params);
+    }
+    ?>
+
     <?php require_once __DIR__ . '/user_modals.php'; ?>
     
     <?php require_once __DIR__ . '/../partials/footer.php'; ?>
 
     <script>
+    function changePerPage(perPage) {
+        const params = new URLSearchParams(window.location.search);
+        params.set('per_page', perPage);
+        params.set('page', 1); // Reset to first page when changing per page
+        window.location.search = params.toString();
+    }
+
     document.addEventListener('DOMContentLoaded', function () {
         const currentUserId = <?php echo json_encode($_SESSION['user_id']); ?>;
         // Edit User Modal - Data Population

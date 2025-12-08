@@ -132,7 +132,7 @@ class User {
         return $stmt->fetch(PDO::FETCH_ASSOC);
     }
 
-    public static function findAll() {
+    public static function findAll($page = null, $perPage = null, $filters = []) {
         $db = self::getDB();
         $sql = "
             SELECT
@@ -142,12 +142,93 @@ class User {
             FROM " . self::$table . " u
             LEFT JOIN StaffResortAssignments sra ON u.UserID = sra.UserID AND u.Role = 'Staff'
             LEFT JOIN Resorts r ON sra.ResortID = r.ResortID
-            GROUP BY u.UserID
-            ORDER BY u.CreatedAt DESC
         ";
+
+        $conditions = [];
+        $params = [];
+
+        // Apply filters
+        if (!empty($filters['role'])) {
+            $conditions[] = "u.Role = :role";
+            $params[':role'] = $filters['role'];
+        }
+
+        if (!empty($filters['is_active']) && $filters['is_active'] !== 'all') {
+            $conditions[] = "u.IsActive = :is_active";
+            $params[':is_active'] = $filters['is_active'] === 'active' ? 1 : 0;
+        }
+
+        if (!empty($filters['search'])) {
+            $conditions[] = "(u.Username LIKE :search OR u.Email LIKE :search OR u.FirstName LIKE :search OR u.LastName LIKE :search)";
+            $params[':search'] = '%' . $filters['search'] . '%';
+        }
+
+        if (!empty($conditions)) {
+            $sql .= " WHERE " . implode(" AND ", $conditions);
+        }
+
+        $sql .= " GROUP BY u.UserID ORDER BY u.CreatedAt DESC";
+
+        // Add pagination if provided
+        if ($page !== null && $perPage !== null) {
+            $offset = ($page - 1) * $perPage;
+            $sql .= " LIMIT :limit OFFSET :offset";
+        }
+
         $stmt = $db->prepare($sql);
+        
+        // Bind filter parameters
+        foreach ($params as $key => $value) {
+            $stmt->bindValue($key, $value);
+        }
+
+        // Bind pagination parameters if provided
+        if ($page !== null && $perPage !== null) {
+            $stmt->bindValue(':limit', (int)$perPage, PDO::PARAM_INT);
+            $stmt->bindValue(':offset', (int)(($page - 1) * $perPage), PDO::PARAM_INT);
+        }
+
         $stmt->execute();
         return $stmt->fetchAll(PDO::FETCH_ASSOC);
+    }
+
+    public static function countAll($filters = []) {
+        $db = self::getDB();
+        $sql = "SELECT COUNT(DISTINCT u.UserID) as total FROM " . self::$table . " u";
+
+        $conditions = [];
+        $params = [];
+
+        // Apply filters
+        if (!empty($filters['role'])) {
+            $conditions[] = "u.Role = :role";
+            $params[':role'] = $filters['role'];
+        }
+
+        if (!empty($filters['is_active']) && $filters['is_active'] !== 'all') {
+            $conditions[] = "u.IsActive = :is_active";
+            $params[':is_active'] = $filters['is_active'] === 'active' ? 1 : 0;
+        }
+
+        if (!empty($filters['search'])) {
+            $conditions[] = "(u.Username LIKE :search OR u.Email LIKE :search OR u.FirstName LIKE :search OR u.LastName LIKE :search)";
+            $params[':search'] = '%' . $filters['search'] . '%';
+        }
+
+        if (!empty($conditions)) {
+            $sql .= " WHERE " . implode(" AND ", $conditions);
+        }
+
+        $stmt = $db->prepare($sql);
+        
+        foreach ($params as $key => $value) {
+            $stmt->bindValue($key, $value);
+        }
+
+        $stmt->execute();
+        $result = $stmt->fetch(PDO::FETCH_ASSOC);
+        
+        return (int)$result['total'];
     }
 
     public static function findById($id) {

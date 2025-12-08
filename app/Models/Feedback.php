@@ -46,7 +46,7 @@ class Feedback {
         return $stmt->fetchObject('Feedback');
     }
 
-    public static function findAll($resortIds = null) {
+    public static function findAll($resortIds = null, $page = null, $perPage = null) {
         $db = self::getDB();
         $query = "SELECT f.FeedbackID, f.BookingID, f.Rating, f.Comment, f.CreatedAt, b.BookingDate, u.UserID as CustomerID, u.Username as CustomerName,
                          r.Name as ResortName, b.ResortID,
@@ -81,8 +81,27 @@ class Feedback {
 
         $query .= " GROUP BY f.FeedbackID ORDER BY f.CreatedAt DESC";
 
+        // Add pagination if provided
+        if ($page !== null && $perPage !== null) {
+            $offset = ($page - 1) * $perPage;
+            $query .= " LIMIT ? OFFSET ?";
+        }
+
         $stmt = $db->prepare($query);
-        $stmt->execute($params);
+        
+        // Bind parameters
+        $paramIndex = 1;
+        foreach ($params as $param) {
+            $stmt->bindValue($paramIndex++, $param);
+        }
+        
+        // Bind pagination parameters if provided
+        if ($page !== null && $perPage !== null) {
+            $stmt->bindValue($paramIndex++, (int)$perPage, PDO::PARAM_INT);
+            $stmt->bindValue($paramIndex++, (int)(($page - 1) * $perPage), PDO::PARAM_INT);
+        }
+        
+        $stmt->execute();
         $results = $stmt->fetchAll(PDO::FETCH_ASSOC);
 
         foreach ($results as &$result) {
@@ -100,7 +119,41 @@ class Feedback {
         return $results;
     }
 
-    public static function findAllFacilityFeedbacks($resortIds = null) {
+    public static function countAll($resortIds = null) {
+        $db = self::getDB();
+        $query = "SELECT COUNT(DISTINCT f.FeedbackID) as total
+                  FROM Feedback f
+                  JOIN Bookings b ON f.BookingID = b.BookingID";
+
+        $conditions = [];
+        $params = [];
+
+        if ($resortIds !== null) {
+            if (is_array($resortIds)) {
+                if (empty($resortIds)) {
+                    return 0;
+                }
+                $placeholders = implode(',', array_fill(0, count($resortIds), '?'));
+                $conditions[] = "b.ResortID IN ($placeholders)";
+                $params = $resortIds;
+            } else {
+                $conditions[] = "b.ResortID = ?";
+                $params[] = $resortIds;
+            }
+        }
+
+        if (!empty($conditions)) {
+            $query .= " WHERE " . implode(" AND ", $conditions);
+        }
+
+        $stmt = $db->prepare($query);
+        $stmt->execute($params);
+        $result = $stmt->fetch(PDO::FETCH_ASSOC);
+        
+        return (int)$result['total'];
+    }
+
+    public static function findAllFacilityFeedbacks($resortIds = null, $page = null, $perPage = null) {
         $db = self::getDB();
         $query = "SELECT ff.FacilityFeedbackID, ff.FeedbackID, ff.FacilityID, ff.Rating, ff.Comment, ff.CreatedAt,
                          u.UserID as CustomerID, u.Username as CustomerName, fac.Name as FacilityName, r.Name as ResortName, b.BookingDate, r.ResortID,
@@ -136,8 +189,27 @@ class Feedback {
 
         $query .= " GROUP BY ff.FacilityFeedbackID ORDER BY ff.CreatedAt DESC";
 
+        // Add pagination if provided
+        if ($page !== null && $perPage !== null) {
+            $offset = ($page - 1) * $perPage;
+            $query .= " LIMIT ? OFFSET ?";
+        }
+
         $stmt = $db->prepare($query);
-        $stmt->execute($params);
+        
+        // Bind parameters
+        $paramIndex = 1;
+        foreach ($params as $param) {
+            $stmt->bindValue($paramIndex++, $param);
+        }
+        
+        // Bind pagination parameters if provided
+        if ($page !== null && $perPage !== null) {
+            $stmt->bindValue($paramIndex++, (int)$perPage, PDO::PARAM_INT);
+            $stmt->bindValue($paramIndex++, (int)(($page - 1) * $perPage), PDO::PARAM_INT);
+        }
+        
+        $stmt->execute();
         $results = $stmt->fetchAll(PDO::FETCH_ASSOC);
 
         foreach ($results as &$result) {
@@ -153,6 +225,41 @@ class Feedback {
         }
 
         return $results;
+    }
+
+    public static function countAllFacilityFeedbacks($resortIds = null) {
+        $db = self::getDB();
+        $query = "SELECT COUNT(DISTINCT ff.FacilityFeedbackID) as total
+                  FROM FacilityFeedback ff
+                  JOIN Feedback f ON ff.FeedbackID = f.FeedbackID
+                  JOIN Bookings b ON f.BookingID = b.BookingID";
+
+        $conditions = [];
+        $params = [];
+
+        if ($resortIds !== null) {
+            if (is_array($resortIds)) {
+                if (empty($resortIds)) {
+                    return 0;
+                }
+                $placeholders = implode(',', array_fill(0, count($resortIds), '?'));
+                $conditions[] = "b.ResortID IN ($placeholders)";
+                $params = $resortIds;
+            } else {
+                $conditions[] = "b.ResortID = ?";
+                $params[] = $resortIds;
+            }
+        }
+
+        if (!empty($conditions)) {
+            $query .= " WHERE " . implode(" AND ", $conditions);
+        }
+
+        $stmt = $db->prepare($query);
+        $stmt->execute($params);
+        $result = $stmt->fetch(PDO::FETCH_ASSOC);
+        
+        return (int)$result['total'];
     }
 
    public static function findByFacilityId($facilityId) {
