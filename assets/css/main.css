@@ -505,11 +505,6 @@ body.dark-theme .form-label {
   color: var(--color-text-dark);
 }
 
-/* Make the Gmail helper note readable in dark theme */
-body.dark-theme .gmail-note {
-  color: #ffffff !important;
-}
-
 /* Dark theme modals */
 body.dark-theme .modal-content {
   background-color: var(--color-bg-card-dark);
@@ -649,6 +644,17 @@ body.dark-theme .theme-switcher i.active {
 /* Dark theme text utilities */
 body.dark-theme .text-muted {
   color: var(--color-text-muted-dark) !important;
+}
+
+/* Make the Gmail helper note fully readable in dark mode */
+body.dark-theme .gmail-note {
+  color: var(--color-text-dark) !important;
+}
+
+@media (prefers-color-scheme: dark) {
+  .gmail-note {
+    color: var(--color-text-dark) !important;
+  }
 }
 
 body.dark-theme .text-dark {

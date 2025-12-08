@@ -28,3 +28,21 @@
 [2025-12-04 14:31:37] sendPaymentVerificationConfirmation: sent to carlmanuelg@yahoo.com for booking=1113
 [2025-12-04 14:31:41] sendPaymentVerificationConfirmation: booking=22, customer=69, notify_update=1
 [2025-12-04 14:31:45] sendPaymentVerificationConfirmation: sent to carlmanuelg@yahoo.com for booking=22
+[2025-12-04 15:16:20] sendBookingConfirmation: booking=2037, customer=73, notify_new=1
+[2025-12-04 15:16:24] sendBookingConfirmation: sent to kiritokurosakig@gmail.com for booking=2037
+[2025-12-04 15:17:07] sendPaymentVerificationConfirmation: booking=2037, customer=73, notify_update=1
+[2025-12-04 15:17:13] sendPaymentVerificationConfirmation: sent to kiritokurosakig@gmail.com for booking=2037
+[2025-12-04 15:27:09] sendBookingConfirmation: booking=2038, customer=73, notify_new=1
+[2025-12-04 15:27:13] sendBookingConfirmation: sent to kiritokurosakig@gmail.com for booking=2038
+[2025-12-04 16:49:56] sendBookingRescheduleNotification: booking=2037, customer=73, notify_update=1
+[2025-12-04 16:49:59] sendBookingRescheduleNotification: sent to kiritokurosakig@gmail.com for booking=2037
+[2025-12-04 16:50:18] sendBookingRescheduleNotification: booking=2038, customer=73, notify_update=1
+[2025-12-04 16:50:21] sendBookingRescheduleNotification: sent to kiritokurosakig@gmail.com for booking=2038
+[2025-12-04 16:53:25] sendBookingRescheduleNotification: booking=1113, customer=69, notify_update=1
+[2025-12-04 16:53:29] sendBookingRescheduleNotification: sent to carlmanuelg@yahoo.com for booking=1113
+[2025-12-04 16:54:04] sendBookingRescheduleNotification: booking=1935, customer=7, notify_update=1
+[2025-12-04 16:54:08] sendBookingRescheduleNotification: sent to jorovillaraza@gmail.com for booking=1935
+[2025-12-04 19:12:51] sendBookingRescheduleNotification: booking=2029, customer=73, notify_update=1
+[2025-12-04 19:12:57] sendBookingRescheduleNotification: sent to kiritokurosakig@gmail.com for booking=2029
+[2025-12-04 20:17:06] sendBookingRescheduleNotification: booking=2028, customer=73, notify_update=1
+[2025-12-04 20:17:10] sendBookingRescheduleNotification: sent to kiritokurosakig@gmail.com for booking=2028

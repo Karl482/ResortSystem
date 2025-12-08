@@ -116,6 +116,7 @@ require_once __DIR__ . '/../partials/header.php';
                                 <th>Resort</th>
                                 <th>Facilities</th>
                                 <th class="text-center">Status</th>
+                                <th class="text-center">Actions</th>
                             </tr>
                         </thead>
                         <tbody id="upcoming-bookings-tbody">
@@ -153,6 +154,22 @@ require_once __DIR__ . '/../partials/header.php';
                                             <?= htmlspecialchars($booking->Status) ?>
                                         </span>
                                     </td>
+                                    <td class="text-center">
+                                        <?php if ($booking->Status === 'Confirmed' || $booking->Status === 'Pending'): ?>
+                                            <button type="button" class="btn btn-warning btn-sm"
+                                                    data-bs-toggle="modal"
+                                                    data-bs-target="#staffRescheduleModal"
+                                                    data-booking-id="<?= $booking->BookingID ?>"
+                                                    data-booking-date="<?= $booking->BookingDate ?>"
+                                                    data-time-slot="<?= $booking->TimeSlotType ?>"
+                                                    data-customer-name="<?= htmlspecialchars($booking->CustomerName) ?>"
+                                                    data-resort-name="<?= htmlspecialchars($booking->ResortName) ?>">
+                                                <i class="fas fa-calendar-alt"></i> Request Reschedule
+                                            </button>
+                                        <?php else: ?>
+                                            <span class="text-muted">-</span>
+                                        <?php endif; ?>
+                                    </td>
                                 </tr>
                             <?php endforeach; ?>
                         </tbody>
@@ -180,6 +197,179 @@ document.addEventListener('DOMContentLoaded', function() {
         });
     }
 });
+
+// Handle staff reschedule modal - must be inside DOMContentLoaded
+document.addEventListener('DOMContentLoaded', function() {
+    const staffRescheduleModal = document.getElementById('staffRescheduleModal');
+    if (staffRescheduleModal) {
+        staffRescheduleModal.addEventListener('show.bs.modal', function (event) {
+            const button = event.relatedTarget;
+            const bookingId = button.getAttribute('data-booking-id');
+            const bookingDate = button.getAttribute('data-booking-date');
+            const timeSlot = button.getAttribute('data-time-slot');
+            const customerName = button.getAttribute('data-customer-name');
+            const resortName = button.getAttribute('data-resort-name');
+
+            console.log('Staff reschedule modal - Booking ID:', bookingId); // Debug log
+
+            document.getElementById('staffRescheduleBookingId').value = bookingId;
+            
+            const timeSlotDisplay = {
+                '12_hours': '12 Hours (7:00 AM - 5:00 PM)',
+                'overnight': 'Overnight (7:00 PM - 5:00 AM)',
+                '24_hours': '24 Hours (7:00 AM - 5:00 AM Next Day)'
+            };
+            
+            document.getElementById('staffCurrentBookingInfo').innerHTML = `
+                <strong>Customer:</strong> ${customerName}<br>
+                <strong>Resort:</strong> ${resortName}<br>
+                <strong>Date:</strong> ${new Date(bookingDate).toLocaleDateString('en-US', { year: 'numeric', month: 'long', day: 'numeric' })}<br>
+                <strong>Time Slot:</strong> ${timeSlotDisplay[timeSlot] || timeSlot}
+            `;
+        });
+    }
+});
 </script>
 
+<!-- Staff Reschedule Request Modal -->
+<div class="modal fade" id="staffRescheduleModal" tabindex="-1">
+    <div class="modal-dialog">
+        <div class="modal-content">
+            <form method="POST" action="?controller=user&action=submitRescheduleRequest">
+                <div class="modal-header">
+                    <h5 class="modal-title"><i class="fas fa-calendar-alt"></i> Request Booking Reschedule</h5>
+                    <button type="button" class="btn-close" data-bs-dismiss="modal"></button>
+                </div>
+                <div class="modal-body">
+                    <input type="hidden" id="staffRescheduleBookingId" name="booking_id">
+                    
+                    <div class="alert alert-info">
+                        <i class="fas fa-info-circle"></i> <strong>Current Booking:</strong>
+                        <div id="staffCurrentBookingInfo" class="mt-2"></div>
+                    </div>
+
+                    <div class="alert alert-warning">
+                        <i class="fas fa-exclamation-triangle"></i> Your reschedule request will be reviewed by an admin. The customer will be notified once it's approved or rejected.
+                    </div>
+
+                    <div class="mb-3">
+                        <label for="staffRequestedDate" class="form-label">Requested New Date <span class="text-danger">*</span></label>
+                        <input type="date" class="form-control" id="staffRequestedDate" name="requested_date" required min="<?= date('Y-m-d') ?>">
+                    </div>
+
+                    <div class="mb-3">
+                        <label for="staffRequestedTimeSlot" class="form-label">Requested Time Slot <span class="text-danger">*</span></label>
+                        <select class="form-select" id="staffRequestedTimeSlot" name="requested_time_slot" required>
+                            <option value="">Select time slot</option>
+                            <option value="12_hours">12 Hours (7:00 AM - 5:00 PM)</option>
+                            <option value="overnight">Overnight (7:00 PM - 5:00 AM)</option>
+                            <option value="24_hours">24 Hours (7:00 AM - 5:00 AM Next Day)</option>
+                        </select>
+                        <small class="text-muted">Note: Availability will be checked by admin before approval</small>
+                    </div>
+
+                    <div class="mb-3">
+                        <label for="staffRescheduleReason" class="form-label">Reason for Reschedule <span class="text-danger">*</span></label>
+                        <textarea class="form-control" id="staffRescheduleReason" name="reason" rows="3" placeholder="Please explain why this booking needs to be rescheduled..." required></textarea>
+                        <small class="text-muted">This reason will be visible to the admin and customer</small>
+                    </div>
+                </div>
+                <div class="modal-footer">
+                    <button type="button" class="btn btn-secondary" data-bs-dismiss="modal">Cancel</button>
+                    <button type="submit" class="btn btn-primary">
+                        <i class="fas fa-paper-plane"></i> Submit Request
+                    </button>
+                </div>
+            </form>
+        </div>
+    </div>
+</div>
+
 <?php require_once __DIR__ . '/../partials/footer.php'; ?>
+
+<script>
+// AJAX submit for staff reschedule modal
+document.addEventListener('DOMContentLoaded', function() {
+    const staffRescheduleModal = document.getElementById('staffRescheduleModal');
+    const staffRescheduleForm = document.querySelector('#staffRescheduleModal form');
+    
+    if (staffRescheduleForm) {
+        staffRescheduleForm.addEventListener('submit', function (e) {
+            // Allow normal form submission - don't prevent default
+            // e.preventDefault();
+            return true; // Let form submit normally
+            
+            /* AJAX code disabled - using normal form submission
+            const form = this;
+            const submitBtn = form.querySelector('button[type="submit"]');
+            const data = new FormData(form);
+
+            submitBtn.disabled = true;
+
+            // Use the form's action attribute directly (browsers auto-resolve it to absolute URL)
+            const actionUrl = form.action;
+            
+            console.log('Submitting staff reschedule to:', actionUrl);
+
+            fetch(actionUrl, {
+                method: 'POST',
+                headers: { 'X-Requested-With': 'XMLHttpRequest' },
+                body: data
+            }).then(r => {
+                console.log('Response status:', r.status, r.statusText);
+                if (!r.ok) throw new Error('HTTP ' + r.status);
+                return r.text().then(text => {
+                    console.log('Response text:', text);
+                    return text ? JSON.parse(text) : {};
+                });
+            }).then(json => {
+                console.log('Parsed JSON:', json);
+                if (json.success) {
+                    // show success alert on page
+                    const alert = document.createElement('div');
+                    alert.className = 'alert alert-success alert-dismissible fade show mt-3';
+                    alert.role = 'alert';
+                    alert.innerHTML = (json.message || 'Request submitted') + '<button type="button" class="btn-close" data-bs-dismiss="alert" aria-label="Close"></button>';
+                    document.querySelector('.container-fluid')?.prepend(alert);
+                    // close modal
+                    if (staffRescheduleModal) {
+                        const modalObj = bootstrap.Modal.getInstance(staffRescheduleModal);
+                        if (modalObj) modalObj.hide();
+                    }
+
+                    // Dispatch custom event so sidebar badge updates
+                    try {
+                        var pending = null;
+                        if (typeof json.pendingCount !== 'undefined') {
+                            pending = parseInt(json.pendingCount, 10) || 0;
+                        } else {
+                            var badge = document.getElementById('rescheduleBadge');
+                            if (badge) {
+                                var cur = parseInt(badge.dataset.count || badge.textContent || '0', 10) || 0;
+                                pending = cur + 1;
+                            }
+                        }
+                        window.dispatchEvent(new CustomEvent('reschedule:submitted', { detail: { pendingCount: pending } }));
+                    } catch (err) {
+                        console.warn('Could not dispatch reschedule event', err);
+                    }
+                } else {
+                    const alert = document.createElement('div');
+                    alert.className = 'alert alert-danger alert-dismissible fade show mt-3';
+                    alert.role = 'alert';
+                    alert.innerHTML = (json.error || 'Failed to submit') + '<button type="button" class="btn-close" data-bs-dismiss="alert" aria-label="Close"></button>';
+                    document.querySelector('.container-fluid')?.prepend(alert);
+                }
+            }).catch(err => {
+                console.error('Reschedule request error:', err);
+                const alert = document.createElement('div');
+                alert.className = 'alert alert-danger alert-dismissible fade show mt-3';
+                alert.role = 'alert';
+                alert.innerHTML = 'Network error: ' + err.message + '<button type="button" class="btn-close" data-bs-dismiss="alert" aria-label="Close"></button>';
+                document.querySelector('.container-fluid')?.prepend(alert);
+            }).finally(() => { submitBtn.disabled = false; });
+            */
+        });
+    }
+});
+</script>

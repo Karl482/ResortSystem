@@ -729,9 +729,14 @@ class Booking {
             $params[':resortId'] = $filters['resort_id'];
         }
         
+        // Handle status filtering
         if (!empty($filters['status']) && $filters['status'] !== 'all') {
+            // If explicitly filtering by a status (including Archived), use that
             $sql .= " AND b.Status = :status";
             $params[':status'] = $filters['status'];
+        } else {
+            // Otherwise, exclude archived bookings by default
+            $sql .= " AND b.Status != 'Archived'";
         }
 
         if (!empty($filters['customer_id'])) {
@@ -757,6 +762,11 @@ class Booking {
         if (!empty($filters['end_date'])) {
             $sql .= " AND b.BookingDate <= :endDate";
             $params[':endDate'] = $filters['end_date'];
+        }
+
+        if (!empty($filters['customer_name_search'])) {
+            $sql .= " AND u.Username LIKE :customerNameSearch";
+            $params[':customerNameSearch'] = '%' . $filters['customer_name_search'] . '%';
         }
         
         $sql .= " GROUP BY b.BookingID";
@@ -831,11 +841,11 @@ class Booking {
     }
 
     /**
-     * Get count of active bookings (excluding completed and cancelled) filtered by resort for admin dashboard
+     * Get count of active bookings (excluding completed, cancelled, and archived) filtered by resort for admin dashboard
      */
     public static function getActiveBookingsCountForAdmin($resortId = null) {
         $db = self::getDB();
-        $sql = "SELECT COUNT(*) as count FROM Bookings WHERE Status IN ('Pending', 'Confirmed')";
+        $sql = "SELECT COUNT(*) as count FROM Bookings WHERE Status IN ('Pending', 'Confirmed') AND Status != 'Archived'";
 
         $params = [];
         if ($resortId) {

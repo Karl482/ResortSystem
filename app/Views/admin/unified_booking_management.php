@@ -34,6 +34,9 @@ tr[id^="booking-row-"] {
                 <div class="card-header d-flex justify-content-between align-items-center flex-wrap gap-2">
                     <h3><i class="fas fa-calendar-check"></i> Unified Booking & Payment Management (<?= $activeBookingCount ?>)</h3>
                     <div class="d-flex gap-2 flex-wrap justify-content-end">
+                        <a href="?controller=admin&action=archivedBookings<?php echo isset($_GET['resort_id']) ? '&resort_id=' . urlencode($_GET['resort_id']) : ''; ?>" class="btn btn-secondary">
+                            <i class="fas fa-archive"></i> View Archived
+                        </a>
                         <?php if ($pendingPaymentCount > 0): ?>
                             <a href="?controller=payment&action=showPendingPayments<?php echo isset($_GET['resort_id']) ? '&resort_id=' . urlencode($_GET['resort_id']) : ''; ?>" class="btn btn-warning">
                                 <i class="fas fa-exclamation-circle"></i> <?= $pendingPaymentCount ?> Pending Payments
@@ -237,6 +240,11 @@ tr[id^="booking-row-"] {
                                                                 </button>
                                                             </li>
                                                             <li>
+                                                                <button class="dropdown-item" type="button" data-bs-toggle="modal" data-bs-target="#rescheduleModal" data-booking-id="<?= $booking->BookingID ?>" data-booking-date="<?= $booking->BookingDate ?>" data-time-slot="<?= $booking->TimeSlotType ?>">
+                                                                    <i class="fas fa-calendar-alt fa-fw me-2"></i>Reschedule
+                                                                </button>
+                                                            </li>
+                                                            <li>
                                                                 <button class="dropdown-item" type="button" data-bs-toggle="modal" data-bs-target="#paymentsModal" data-booking-id="<?= $booking->BookingID ?>">
                                                                     <i class="fas fa-credit-card fa-fw me-2"></i>Payments
                                                                 </button>
@@ -246,6 +254,14 @@ tr[id^="booking-row-"] {
                                                                     <i class="fas fa-history fa-fw me-2"></i>Audit
                                                                 </button>
                                                             </li>
+                                                            <?php if (in_array($booking->Status, ['Cancelled', 'Completed'])): ?>
+                                                            <li><hr class="dropdown-divider"></li>
+                                                            <li>
+                                                                <button class="dropdown-item text-secondary" type="button" onclick="archiveBooking(<?= $booking->BookingID ?>)">
+                                                                    <i class="fas fa-archive fa-fw me-2"></i>Archive
+                                                                </button>
+                                                            </li>
+                                                            <?php endif; ?>
                                                         </ul>
                                                     </div>
 
@@ -374,6 +390,54 @@ tr[id^="booking-row-"] {
            </form>
        </div>
    </div>
+</div>
+
+<!-- Reschedule Modal -->
+<div class="modal fade" id="rescheduleModal" tabindex="-1" aria-labelledby="rescheduleModalLabel" aria-hidden="true">
+    <div class="modal-dialog">
+        <div class="modal-content">
+            <form id="rescheduleForm" method="POST" action="?controller=admin&action=rescheduleBooking">
+                <div class="modal-header">
+                    <h5 class="modal-title" id="rescheduleModalLabel">
+                        <i class="fas fa-calendar-alt"></i> Reschedule Booking
+                    </h5>
+                    <button type="button" class="btn-close" data-bs-dismiss="modal" aria-label="Close"></button>
+                </div>
+                <div class="modal-body">
+                    <input type="hidden" id="rescheduleBookingId" name="booking_id">
+                    
+                    <div class="alert alert-info">
+                        <i class="fas fa-info-circle"></i> Current booking: <strong id="currentBookingInfo"></strong>
+                    </div>
+
+                    <div class="mb-3">
+                        <label for="newBookingDate" class="form-label">New Booking Date <span class="text-danger">*</span></label>
+                        <input type="date" class="form-control" id="newBookingDate" name="new_booking_date" required min="<?= date('Y-m-d') ?>">
+                        <small class="text-muted">Select a new date for the booking</small>
+                    </div>
+
+                    <div class="mb-3">
+                        <label for="newTimeSlot" class="form-label">New Time Slot <span class="text-danger">*</span></label>
+                        <select class="form-select" id="newTimeSlot" name="new_time_slot" required disabled>
+                            <option value="">Select a date first...</option>
+                        </select>
+                        <small class="text-muted" id="timeSlotHelp">Available time slots will appear after selecting a date</small>
+                    </div>
+
+                    <div class="mb-3">
+                        <label for="rescheduleReason" class="form-label">Reason for Rescheduling</label>
+                        <textarea class="form-control" id="rescheduleReason" name="reschedule_reason" rows="3" placeholder="Optional: Explain why this booking is being rescheduled"></textarea>
+                    </div>
+                </div>
+                <div class="modal-footer">
+                    <button type="button" class="btn btn-secondary" data-bs-dismiss="modal">Cancel</button>
+                    <button type="submit" class="btn btn-primary" id="rescheduleSubmitBtn" disabled>
+                        <i class="fas fa-check"></i> Reschedule Booking
+                    </button>
+                </div>
+            </form>
+        </div>
+    </div>
 </div>
 
 <!-- Payments Modal -->
@@ -988,6 +1052,23 @@ function markSchedulePaid(scheduleId) {
     }
 }
 
+function archiveBooking(bookingId) {
+    if (confirm('Are you sure you want to archive this booking? Archived bookings will be moved to a separate view and hidden from active management.')) {
+        const form = document.createElement('form');
+        form.method = 'POST';
+        form.action = '?controller=admin&action=archiveBooking';
+        
+        const input = document.createElement('input');
+        input.type = 'hidden';
+        input.name = 'booking_id';
+        input.value = bookingId;
+        
+        form.appendChild(input);
+        document.body.appendChild(form);
+        form.submit();
+    }
+}
+
 function showToast(message, type = 'info') {
     // Simple toast notification
     const toast = document.createElement('div');
@@ -1004,5 +1085,99 @@ function showToast(message, type = 'info') {
             toast.parentNode.removeChild(toast);
         }
     }, 5000);
+}
+
+// Reschedule Modal Handler
+const rescheduleModal = document.getElementById('rescheduleModal');
+if (rescheduleModal) {
+    rescheduleModal.addEventListener('show.bs.modal', function (event) {
+        const button = event.relatedTarget;
+        const bookingId = button.getAttribute('data-booking-id');
+        const bookingDate = button.getAttribute('data-booking-date');
+        const timeSlot = button.getAttribute('data-time-slot');
+
+        // Set booking ID
+        document.getElementById('rescheduleBookingId').value = bookingId;
+        
+        // Display current booking info
+        const formattedDate = new Date(bookingDate).toLocaleDateString('en-US', { 
+            year: 'numeric', 
+            month: 'long', 
+            day: 'numeric' 
+        });
+        document.getElementById('currentBookingInfo').textContent = `${formattedDate} - ${timeSlot}`;
+        
+        // Reset form
+        document.getElementById('rescheduleForm').reset();
+        document.getElementById('rescheduleBookingId').value = bookingId;
+        document.getElementById('newTimeSlot').disabled = true;
+        document.getElementById('rescheduleSubmitBtn').disabled = true;
+    });
+}
+
+// Handle date change to fetch available time slots
+const newBookingDateInput = document.getElementById('newBookingDate');
+if (newBookingDateInput) {
+    newBookingDateInput.addEventListener('change', function() {
+        const bookingId = document.getElementById('rescheduleBookingId').value;
+        const selectedDate = this.value;
+        const timeSlotSelect = document.getElementById('newTimeSlot');
+        const submitBtn = document.getElementById('rescheduleSubmitBtn');
+        
+        if (!selectedDate) {
+            timeSlotSelect.disabled = true;
+            submitBtn.disabled = true;
+            return;
+        }
+
+        // Show loading state
+        timeSlotSelect.disabled = true;
+        timeSlotSelect.innerHTML = '<option value="">Loading available slots...</option>';
+        
+        // Fetch available time slots
+        fetch(`?controller=admin&action=getAvailableTimeSlotsForReschedule&booking_id=${bookingId}&date=${selectedDate}`)
+            .then(response => response.json())
+            .then(data => {
+                if (data.success && data.available_slots.length > 0) {
+                    timeSlotSelect.innerHTML = '<option value="">Select a time slot</option>';
+                    
+                    const slotLabels = {
+                        '12_hours': '12 Hours (7:00 AM - 5:00 PM)',
+                        'overnight': 'Overnight (7:00 AM - 5:00 AM Next Day)',
+                        '24_hours': '24 Hours (7:00 PM - 5:00 AM)'
+                    };
+                    
+                    data.available_slots.forEach(slot => {
+                        const option = document.createElement('option');
+                        option.value = slot;
+                        option.textContent = slotLabels[slot] || slot;
+                        timeSlotSelect.appendChild(option);
+                    });
+                    
+                    timeSlotSelect.disabled = false;
+                } else {
+                    timeSlotSelect.innerHTML = '<option value="">No available time slots for this date</option>';
+                    timeSlotSelect.disabled = true;
+                    submitBtn.disabled = true;
+                    showToast('No available time slots for the selected date', 'warning');
+                }
+            })
+            .catch(error => {
+                console.error('Error fetching time slots:', error);
+                timeSlotSelect.innerHTML = '<option value="">Error loading time slots</option>';
+                timeSlotSelect.disabled = true;
+                submitBtn.disabled = true;
+                showToast('Error loading available time slots', 'error');
+            });
+    });
+}
+
+// Enable submit button when time slot is selected
+const newTimeSlotSelect = document.getElementById('newTimeSlot');
+if (newTimeSlotSelect) {
+    newTimeSlotSelect.addEventListener('change', function() {
+        const submitBtn = document.getElementById('rescheduleSubmitBtn');
+        submitBtn.disabled = !this.value;
+    });
 }
 </script>

@@ -399,6 +399,73 @@ class Notification {
     }
 
     /**
+     * Send booking reschedule notification to customer
+     * @param int $bookingId The booking ID
+     * @param string $newDate The new booking date
+     * @param string $newTimeSlot The new time slot
+     */
+    public static function sendBookingRescheduleNotification($bookingId, $newDate, $newTimeSlot) {
+        $booking = Booking::findById($bookingId);
+        if (!$booking) return false;
+
+        $customer = User::findById($booking->customerId);
+        if (!$customer) return false;
+
+        self::logNotification("sendBookingRescheduleNotification: booking={$bookingId}, customer={$booking->customerId}, notify_update=" . (isset($customer['NotifyOnReservationUpdate']) ? $customer['NotifyOnReservationUpdate'] : 'NULL'));
+
+        // Respect user preference for reservation updates
+        if (isset($customer['NotifyOnReservationUpdate']) && (int)$customer['NotifyOnReservationUpdate'] === 0) {
+            self::logNotification("sendBookingRescheduleNotification: skipped due to NotifyOnReservationUpdate=0 for user={$booking->customerId}");
+            return true;
+        }
+
+        require_once __DIR__ . '/../Models/Resort.php';
+        $resort = Resort::findById($booking->resortId);
+
+        $mail = self::getMailer();
+        try {
+            $mail->addAddress($customer['Email'], $customer['FirstName']);
+
+            $placeholders = [
+                'customer_name' => htmlspecialchars($customer['FirstName']),
+                'booking_id' => $booking->bookingId,
+                'new_booking_date' => date('F j, Y', strtotime($newDate)),
+                'new_timeslot' => htmlspecialchars(Booking::getTimeSlotDisplay($newTimeSlot)),
+                'resort_name' => $resort ? htmlspecialchars($resort->name) : 'our resort',
+                'total_amount' => number_format($booking->totalAmount ?? 0, 2)
+            ];
+
+            $mail->isHTML(true);
+            $mail->Subject = "Booking #{$booking->bookingId} Rescheduled";
+            $mail->Body = "
+                <div style='font-family: Arial, sans-serif; max-width: 600px; margin: 0 auto;'>
+                    <h2 style='color: #333;'>Booking Rescheduled</h2>
+                    <p>Dear {$placeholders['customer_name']},</p>
+                    <p>Your booking has been rescheduled to a new date and time.</p>
+                    <div style='background-color: #f5f5f5; padding: 15px; border-radius: 5px; margin: 20px 0;'>
+                        <p><strong>Booking ID:</strong> #{$booking->bookingId}</p>
+                        <p><strong>Resort:</strong> {$placeholders['resort_name']}</p>
+                        <p><strong>New Date:</strong> {$placeholders['new_booking_date']}</p>
+                        <p><strong>New Time Slot:</strong> {$placeholders['new_timeslot']}</p>
+                        <p><strong>Total Amount:</strong> ₱{$placeholders['total_amount']}</p>
+                    </div>
+                    <p>If you have any questions about this change, please contact us.</p>
+                    <p>Thank you,<br>Resort Management Team</p>
+                </div>
+            ";
+            $mail->AltBody = "Your booking #{$booking->bookingId} has been rescheduled to {$placeholders['new_booking_date']} - {$placeholders['new_timeslot']}.";
+            
+            $mail->send();
+            self::logNotification("sendBookingRescheduleNotification: sent to {$customer['Email']} for booking={$bookingId}");
+            return true;
+        } catch (Exception $e) {
+            error_log("Booking reschedule notification could not be sent. Mailer Error: {$mail->ErrorInfo}");
+            self::logNotification("sendBookingRescheduleNotification: failed to send to {$customer['Email']} for booking={$bookingId}: {$mail->ErrorInfo}");
+            return false;
+        }
+    }
+
+    /**
      * Send booking status change notification to customer
      * @param int $bookingId The booking ID
      * @param string|null $oldStatus The previous status (null for new bookings)

@@ -102,3 +102,343 @@ Stack trace:
 [2025-12-04 14:13:46] [INFO] File processing completed in 5.9604644775391E-6 seconds. User: {"user_id":73,"role":"Customer","ip":"::1","user_agent":"Mozilla\/5.0 (Windows NT 10.0; Win64; x64) AppleWebKit\/537.36 (KHTML, like Gecko) Chrome\/142.0.0.0 Safari\/537.36"}
 [2025-12-04 14:13:46] [INFO] Starting database transaction. User: {"user_id":73,"role":"Customer","ip":"::1","user_agent":"Mozilla\/5.0 (Windows NT 10.0; Win64; x64) AppleWebKit\/537.36 (KHTML, like Gecko) Chrome\/142.0.0.0 Safari\/537.36"}
 [2025-12-04 14:13:46] [INFO] Database transaction committed successfully in 0.013833999633789 seconds for feedback ID: 16 User: {"user_id":73,"role":"Customer","ip":"::1","user_agent":"Mozilla\/5.0 (Windows NT 10.0; Win64; x64) AppleWebKit\/537.36 (KHTML, like Gecko) Chrome\/142.0.0.0 Safari\/537.36"}
+[2025-12-04 16:45:14] [CRITICAL] Uncaught exception: Call to undefined method BookingFacilities::getFacilityIdsByBookingId() in C:\xampp\htdocs\ResortsSystem\app\Controllers\AdminController.php on line 2471
+Stack trace:
+#0 C:\xampp\htdocs\ResortsSystem\public\index.php(93): AdminController->rescheduleBooking()
+#1 {main} User: {"user_id":1,"role":"Admin","ip":"::1","user_agent":"Mozilla\/5.0 (Windows NT 10.0; Win64; x64) AppleWebKit\/537.36 (KHTML, like Gecko) Chrome\/142.0.0.0 Safari\/537.36"}
+[2025-12-04 16:45:44] [CRITICAL] Uncaught exception: Call to undefined method BookingFacilities::getFacilityIdsByBookingId() in C:\xampp\htdocs\ResortsSystem\app\Controllers\AdminController.php on line 2471
+Stack trace:
+#0 C:\xampp\htdocs\ResortsSystem\public\index.php(93): AdminController->rescheduleBooking()
+#1 {main} User: {"user_id":1,"role":"Admin","ip":"::1","user_agent":"Mozilla\/5.0 (Windows NT 10.0; Win64; x64) AppleWebKit\/537.36 (KHTML, like Gecko) Chrome\/142.0.0.0 Safari\/537.36"}
+[2025-12-04 16:47:21] [CRITICAL] Uncaught exception: Too few arguments to function BookingAuditTrail::logChange(), 4 passed in C:\xampp\htdocs\ResortsSystem\app\Controllers\AdminController.php on line 2494 and at least 6 expected in C:\xampp\htdocs\ResortsSystem\app\Models\BookingAuditTrail.php on line 54
+Stack trace:
+#0 C:\xampp\htdocs\ResortsSystem\app\Controllers\AdminController.php(2494): BookingAuditTrail::logChange(2037, 1, 'Rescheduled', 'Rescheduled fro...')
+#1 C:\xampp\htdocs\ResortsSystem\public\index.php(93): AdminController->rescheduleBooking()
+#2 {main} User: {"user_id":1,"role":"Admin","ip":"::1","user_agent":"Mozilla\/5.0 (Windows NT 10.0; Win64; x64) AppleWebKit\/537.36 (KHTML, like Gecko) Chrome\/142.0.0.0 Safari\/537.36"}
+[2025-12-04 16:51:00] [CRITICAL] Uncaught exception: Too few arguments to function BookingAuditTrail::logChange(), 4 passed in C:\xampp\htdocs\ResortsSystem\app\Controllers\AdminController.php on line 2494 and at least 6 expected in C:\xampp\htdocs\ResortsSystem\app\Models\BookingAuditTrail.php on line 54
+Stack trace:
+#0 C:\xampp\htdocs\ResortsSystem\app\Controllers\AdminController.php(2494): BookingAuditTrail::logChange(2038, 1, 'Rescheduled', 'Rescheduled fro...')
+#1 C:\xampp\htdocs\ResortsSystem\public\index.php(93): AdminController->rescheduleBooking()
+#2 {main} User: {"user_id":1,"role":"Admin","ip":"::1","user_agent":"Mozilla\/5.0 (Windows NT 10.0; Win64; x64) AppleWebKit\/537.36 (KHTML, like Gecko) Chrome\/142.0.0.0 Safari\/537.36"}
+[2025-12-04 16:51:21] [CRITICAL] Uncaught exception: Too few arguments to function BookingAuditTrail::logChange(), 4 passed in C:\xampp\htdocs\ResortsSystem\app\Controllers\AdminController.php on line 2494 and at least 6 expected in C:\xampp\htdocs\ResortsSystem\app\Models\BookingAuditTrail.php on line 54
+Stack trace:
+#0 C:\xampp\htdocs\ResortsSystem\app\Controllers\AdminController.php(2494): BookingAuditTrail::logChange(2037, 1, 'Rescheduled', 'Rescheduled fro...')
+#1 C:\xampp\htdocs\ResortsSystem\public\index.php(93): AdminController->rescheduleBooking()
+#2 {main} User: {"user_id":1,"role":"Admin","ip":"::1","user_agent":"Mozilla\/5.0 (Windows NT 10.0; Win64; x64) AppleWebKit\/537.36 (KHTML, like Gecko) Chrome\/142.0.0.0 Safari\/537.36"}
+[2025-12-04 17:03:40] [CRITICAL] Uncaught exception: SQLSTATE[42S02]: Base table or view not found: 1146 Table 'resorts_system.reschedulerequests' doesn't exist in C:\xampp\htdocs\ResortsSystem\app\Models\RescheduleRequest.php on line 268
+Stack trace:
+#0 C:\xampp\htdocs\ResortsSystem\app\Models\RescheduleRequest.php(268): PDO->prepare('SELECT COUNT(*)...')
+#1 C:\xampp\htdocs\ResortsSystem\app\Views\partials\admin_sidebar.php(140): RescheduleRequest::getPendingCount()
+#2 C:\xampp\htdocs\ResortsSystem\app\Views\partials\header.php(74): require_once('C:\\xampp\\htdocs...')
+#3 C:\xampp\htdocs\ResortsSystem\app\Views\admin\unified_booking_management.php(3): require_once('C:\\xampp\\htdocs...')
+#4 C:\xampp\htdocs\ResortsSystem\app\Controllers\AdminController.php(1267): require_once('C:\\xampp\\htdocs...')
+#5 C:\xampp\htdocs\ResortsSystem\public\index.php(93): AdminController->unifiedBookingManagement()
+#6 {main} User: {"user_id":1,"role":"Admin","ip":"::1","user_agent":"Mozilla\/5.0 (Windows NT 10.0; Win64; x64) AppleWebKit\/537.36 (KHTML, like Gecko) Chrome\/142.0.0.0 Safari\/537.36"}
+[2025-12-04 17:03:43] [CRITICAL] Uncaught exception: SQLSTATE[42S02]: Base table or view not found: 1146 Table 'resorts_system.reschedulerequests' doesn't exist in C:\xampp\htdocs\ResortsSystem\app\Models\RescheduleRequest.php on line 268
+Stack trace:
+#0 C:\xampp\htdocs\ResortsSystem\app\Models\RescheduleRequest.php(268): PDO->prepare('SELECT COUNT(*)...')
+#1 C:\xampp\htdocs\ResortsSystem\app\Views\partials\admin_sidebar.php(140): RescheduleRequest::getPendingCount()
+#2 C:\xampp\htdocs\ResortsSystem\app\Views\partials\header.php(74): require_once('C:\\xampp\\htdocs...')
+#3 C:\xampp\htdocs\ResortsSystem\app\Views\admin\unified_booking_management.php(3): require_once('C:\\xampp\\htdocs...')
+#4 C:\xampp\htdocs\ResortsSystem\app\Controllers\AdminController.php(1267): require_once('C:\\xampp\\htdocs...')
+#5 C:\xampp\htdocs\ResortsSystem\public\index.php(93): AdminController->unifiedBookingManagement()
+#6 {main} User: {"user_id":1,"role":"Admin","ip":"::1","user_agent":"Mozilla\/5.0 (Windows NT 10.0; Win64; x64) AppleWebKit\/537.36 (KHTML, like Gecko) Chrome\/142.0.0.0 Safari\/537.36"}
+[2025-12-04 17:03:44] [CRITICAL] Uncaught exception: SQLSTATE[42S02]: Base table or view not found: 1146 Table 'resorts_system.reschedulerequests' doesn't exist in C:\xampp\htdocs\ResortsSystem\app\Models\RescheduleRequest.php on line 268
+Stack trace:
+#0 C:\xampp\htdocs\ResortsSystem\app\Models\RescheduleRequest.php(268): PDO->prepare('SELECT COUNT(*)...')
+#1 C:\xampp\htdocs\ResortsSystem\app\Views\partials\admin_sidebar.php(140): RescheduleRequest::getPendingCount()
+#2 C:\xampp\htdocs\ResortsSystem\app\Views\partials\header.php(74): require_once('C:\\xampp\\htdocs...')
+#3 C:\xampp\htdocs\ResortsSystem\app\Views\admin\unified_booking_management.php(3): require_once('C:\\xampp\\htdocs...')
+#4 C:\xampp\htdocs\ResortsSystem\app\Controllers\AdminController.php(1267): require_once('C:\\xampp\\htdocs...')
+#5 C:\xampp\htdocs\ResortsSystem\public\index.php(93): AdminController->unifiedBookingManagement()
+#6 {main} User: {"user_id":1,"role":"Admin","ip":"::1","user_agent":"Mozilla\/5.0 (Windows NT 10.0; Win64; x64) AppleWebKit\/537.36 (KHTML, like Gecko) Chrome\/142.0.0.0 Safari\/537.36"}
+[2025-12-04 17:03:48] [CRITICAL] Uncaught exception: SQLSTATE[42S02]: Base table or view not found: 1146 Table 'resorts_system.reschedulerequests' doesn't exist in C:\xampp\htdocs\ResortsSystem\app\Models\RescheduleRequest.php on line 268
+Stack trace:
+#0 C:\xampp\htdocs\ResortsSystem\app\Models\RescheduleRequest.php(268): PDO->prepare('SELECT COUNT(*)...')
+#1 C:\xampp\htdocs\ResortsSystem\app\Views\partials\admin_sidebar.php(140): RescheduleRequest::getPendingCount()
+#2 C:\xampp\htdocs\ResortsSystem\app\Views\partials\header.php(74): require_once('C:\\xampp\\htdocs...')
+#3 C:\xampp\htdocs\ResortsSystem\app\Views\admin\unified_booking_management.php(3): require_once('C:\\xampp\\htdocs...')
+#4 C:\xampp\htdocs\ResortsSystem\app\Controllers\AdminController.php(1267): require_once('C:\\xampp\\htdocs...')
+#5 C:\xampp\htdocs\ResortsSystem\public\index.php(93): AdminController->unifiedBookingManagement()
+#6 {main} User: {"user_id":1,"role":"Admin","ip":"::1","user_agent":"Mozilla\/5.0 (Windows NT 10.0; Win64; x64) AppleWebKit\/537.36 (KHTML, like Gecko) Chrome\/142.0.0.0 Safari\/537.36"}
+[2025-12-04 17:03:49] [CRITICAL] Uncaught exception: SQLSTATE[42S02]: Base table or view not found: 1146 Table 'resorts_system.reschedulerequests' doesn't exist in C:\xampp\htdocs\ResortsSystem\app\Models\RescheduleRequest.php on line 268
+Stack trace:
+#0 C:\xampp\htdocs\ResortsSystem\app\Models\RescheduleRequest.php(268): PDO->prepare('SELECT COUNT(*)...')
+#1 C:\xampp\htdocs\ResortsSystem\app\Views\partials\admin_sidebar.php(140): RescheduleRequest::getPendingCount()
+#2 C:\xampp\htdocs\ResortsSystem\app\Views\partials\header.php(74): require_once('C:\\xampp\\htdocs...')
+#3 C:\xampp\htdocs\ResortsSystem\app\Views\admin\unified_booking_management.php(3): require_once('C:\\xampp\\htdocs...')
+#4 C:\xampp\htdocs\ResortsSystem\app\Controllers\AdminController.php(1267): require_once('C:\\xampp\\htdocs...')
+#5 C:\xampp\htdocs\ResortsSystem\public\index.php(93): AdminController->unifiedBookingManagement()
+#6 {main} User: {"user_id":1,"role":"Admin","ip":"::1","user_agent":"Mozilla\/5.0 (Windows NT 10.0; Win64; x64) AppleWebKit\/537.36 (KHTML, like Gecko) Chrome\/142.0.0.0 Safari\/537.36"}
+[2025-12-04 17:03:50] [CRITICAL] Uncaught exception: SQLSTATE[42S02]: Base table or view not found: 1146 Table 'resorts_system.reschedulerequests' doesn't exist in C:\xampp\htdocs\ResortsSystem\app\Models\RescheduleRequest.php on line 268
+Stack trace:
+#0 C:\xampp\htdocs\ResortsSystem\app\Models\RescheduleRequest.php(268): PDO->prepare('SELECT COUNT(*)...')
+#1 C:\xampp\htdocs\ResortsSystem\app\Views\partials\admin_sidebar.php(140): RescheduleRequest::getPendingCount()
+#2 C:\xampp\htdocs\ResortsSystem\app\Views\partials\header.php(74): require_once('C:\\xampp\\htdocs...')
+#3 C:\xampp\htdocs\ResortsSystem\app\Views\admin\unified_booking_management.php(3): require_once('C:\\xampp\\htdocs...')
+#4 C:\xampp\htdocs\ResortsSystem\app\Controllers\AdminController.php(1267): require_once('C:\\xampp\\htdocs...')
+#5 C:\xampp\htdocs\ResortsSystem\public\index.php(93): AdminController->unifiedBookingManagement()
+#6 {main} User: {"user_id":1,"role":"Admin","ip":"::1","user_agent":"Mozilla\/5.0 (Windows NT 10.0; Win64; x64) AppleWebKit\/537.36 (KHTML, like Gecko) Chrome\/142.0.0.0 Safari\/537.36"}
+[2025-12-04 17:03:52] [CRITICAL] Uncaught exception: SQLSTATE[42S02]: Base table or view not found: 1146 Table 'resorts_system.reschedulerequests' doesn't exist in C:\xampp\htdocs\ResortsSystem\app\Models\RescheduleRequest.php on line 268
+Stack trace:
+#0 C:\xampp\htdocs\ResortsSystem\app\Models\RescheduleRequest.php(268): PDO->prepare('SELECT COUNT(*)...')
+#1 C:\xampp\htdocs\ResortsSystem\app\Views\partials\admin_sidebar.php(140): RescheduleRequest::getPendingCount()
+#2 C:\xampp\htdocs\ResortsSystem\app\Views\partials\header.php(74): require_once('C:\\xampp\\htdocs...')
+#3 C:\xampp\htdocs\ResortsSystem\app\Views\admin\unified_booking_management.php(3): require_once('C:\\xampp\\htdocs...')
+#4 C:\xampp\htdocs\ResortsSystem\app\Controllers\AdminController.php(1267): require_once('C:\\xampp\\htdocs...')
+#5 C:\xampp\htdocs\ResortsSystem\public\index.php(93): AdminController->unifiedBookingManagement()
+#6 {main} User: {"user_id":1,"role":"Admin","ip":"::1","user_agent":"Mozilla\/5.0 (Windows NT 10.0; Win64; x64) AppleWebKit\/537.36 (KHTML, like Gecko) Chrome\/142.0.0.0 Safari\/537.36"}
+[2025-12-04 17:03:54] [CRITICAL] Uncaught exception: SQLSTATE[42S02]: Base table or view not found: 1146 Table 'resorts_system.reschedulerequests' doesn't exist in C:\xampp\htdocs\ResortsSystem\app\Models\RescheduleRequest.php on line 268
+Stack trace:
+#0 C:\xampp\htdocs\ResortsSystem\app\Models\RescheduleRequest.php(268): PDO->prepare('SELECT COUNT(*)...')
+#1 C:\xampp\htdocs\ResortsSystem\app\Views\partials\admin_sidebar.php(140): RescheduleRequest::getPendingCount()
+#2 C:\xampp\htdocs\ResortsSystem\app\Views\partials\header.php(74): require_once('C:\\xampp\\htdocs...')
+#3 C:\xampp\htdocs\ResortsSystem\app\Views\admin\unified_booking_management.php(3): require_once('C:\\xampp\\htdocs...')
+#4 C:\xampp\htdocs\ResortsSystem\app\Controllers\AdminController.php(1267): require_once('C:\\xampp\\htdocs...')
+#5 C:\xampp\htdocs\ResortsSystem\public\index.php(93): AdminController->unifiedBookingManagement()
+#6 {main} User: {"user_id":1,"role":"Admin","ip":"::1","user_agent":"Mozilla\/5.0 (Windows NT 10.0; Win64; x64) AppleWebKit\/537.36 (KHTML, like Gecko) Chrome\/142.0.0.0 Safari\/537.36"}
+[2025-12-04 17:03:55] [CRITICAL] Uncaught exception: SQLSTATE[42S02]: Base table or view not found: 1146 Table 'resorts_system.reschedulerequests' doesn't exist in C:\xampp\htdocs\ResortsSystem\app\Models\RescheduleRequest.php on line 268
+Stack trace:
+#0 C:\xampp\htdocs\ResortsSystem\app\Models\RescheduleRequest.php(268): PDO->prepare('SELECT COUNT(*)...')
+#1 C:\xampp\htdocs\ResortsSystem\app\Views\partials\admin_sidebar.php(140): RescheduleRequest::getPendingCount()
+#2 C:\xampp\htdocs\ResortsSystem\app\Views\partials\header.php(74): require_once('C:\\xampp\\htdocs...')
+#3 C:\xampp\htdocs\ResortsSystem\app\Views\admin\payments\pending.php(3): require_once('C:\\xampp\\htdocs...')
+#4 C:\xampp\htdocs\ResortsSystem\app\Controllers\PaymentController.php(137): require_once('C:\\xampp\\htdocs...')
+#5 C:\xampp\htdocs\ResortsSystem\public\index.php(129): PaymentController->showPendingPayments()
+#6 {main} User: {"user_id":1,"role":"Admin","ip":"::1","user_agent":"Mozilla\/5.0 (Windows NT 10.0; Win64; x64) AppleWebKit\/537.36 (KHTML, like Gecko) Chrome\/142.0.0.0 Safari\/537.36"}
+[2025-12-04 17:03:56] [CRITICAL] Uncaught exception: SQLSTATE[42S02]: Base table or view not found: 1146 Table 'resorts_system.reschedulerequests' doesn't exist in C:\xampp\htdocs\ResortsSystem\app\Models\RescheduleRequest.php on line 101
+Stack trace:
+#0 C:\xampp\htdocs\ResortsSystem\app\Models\RescheduleRequest.php(101): PDO->prepare('SELECT rr.*, \r\n...')
+#1 C:\xampp\htdocs\ResortsSystem\app\Controllers\AdminController.php(2542): RescheduleRequest::getAllPendingRequests(NULL)
+#2 C:\xampp\htdocs\ResortsSystem\public\index.php(93): AdminController->rescheduleRequests()
+#3 {main} User: {"user_id":1,"role":"Admin","ip":"::1","user_agent":"Mozilla\/5.0 (Windows NT 10.0; Win64; x64) AppleWebKit\/537.36 (KHTML, like Gecko) Chrome\/142.0.0.0 Safari\/537.36"}
+[2025-12-04 17:03:58] [CRITICAL] Uncaught exception: SQLSTATE[42S02]: Base table or view not found: 1146 Table 'resorts_system.reschedulerequests' doesn't exist in C:\xampp\htdocs\ResortsSystem\app\Models\RescheduleRequest.php on line 268
+Stack trace:
+#0 C:\xampp\htdocs\ResortsSystem\app\Models\RescheduleRequest.php(268): PDO->prepare('SELECT COUNT(*)...')
+#1 C:\xampp\htdocs\ResortsSystem\app\Views\partials\admin_sidebar.php(140): RescheduleRequest::getPendingCount()
+#2 C:\xampp\htdocs\ResortsSystem\app\Views\partials\header.php(74): require_once('C:\\xampp\\htdocs...')
+#3 C:\xampp\htdocs\ResortsSystem\app\Views\admin\dashboard.php(14): require_once('C:\\xampp\\htdocs...')
+#4 C:\xampp\htdocs\ResortsSystem\app\Controllers\AdminController.php(98): include('C:\\xampp\\htdocs...')
+#5 C:\xampp\htdocs\ResortsSystem\public\index.php(74): AdminController->dashboard()
+#6 {main} User: {"user_id":1,"role":"Admin","ip":"::1","user_agent":"Mozilla\/5.0 (Windows NT 10.0; Win64; x64) AppleWebKit\/537.36 (KHTML, like Gecko) Chrome\/142.0.0.0 Safari\/537.36"}
+[2025-12-04 17:04:01] [CRITICAL] Uncaught exception: SQLSTATE[42S02]: Base table or view not found: 1146 Table 'resorts_system.reschedulerequests' doesn't exist in C:\xampp\htdocs\ResortsSystem\app\Models\RescheduleRequest.php on line 268
+Stack trace:
+#0 C:\xampp\htdocs\ResortsSystem\app\Models\RescheduleRequest.php(268): PDO->prepare('SELECT COUNT(*)...')
+#1 C:\xampp\htdocs\ResortsSystem\app\Views\partials\admin_sidebar.php(140): RescheduleRequest::getPendingCount()
+#2 C:\xampp\htdocs\ResortsSystem\app\Views\partials\header.php(74): require_once('C:\\xampp\\htdocs...')
+#3 C:\xampp\htdocs\ResortsSystem\app\Views\admin\unified_booking_management.php(3): require_once('C:\\xampp\\htdocs...')
+#4 C:\xampp\htdocs\ResortsSystem\app\Controllers\AdminController.php(1267): require_once('C:\\xampp\\htdocs...')
+#5 C:\xampp\htdocs\ResortsSystem\public\index.php(93): AdminController->unifiedBookingManagement()
+#6 {main} User: {"user_id":1,"role":"Admin","ip":"::1","user_agent":"Mozilla\/5.0 (Windows NT 10.0; Win64; x64) AppleWebKit\/537.36 (KHTML, like Gecko) Chrome\/142.0.0.0 Safari\/537.36"}
+[2025-12-04 17:04:15] [CRITICAL] Uncaught exception: SQLSTATE[42S02]: Base table or view not found: 1146 Table 'resorts_system.reschedulerequests' doesn't exist in C:\xampp\htdocs\ResortsSystem\app\Models\RescheduleRequest.php on line 268
+Stack trace:
+#0 C:\xampp\htdocs\ResortsSystem\app\Models\RescheduleRequest.php(268): PDO->prepare('SELECT COUNT(*)...')
+#1 C:\xampp\htdocs\ResortsSystem\app\Views\partials\admin_sidebar.php(140): RescheduleRequest::getPendingCount()
+#2 C:\xampp\htdocs\ResortsSystem\app\Views\partials\header.php(74): require_once('C:\\xampp\\htdocs...')
+#3 C:\xampp\htdocs\ResortsSystem\app\Views\admin\unified_booking_management.php(3): require_once('C:\\xampp\\htdocs...')
+#4 C:\xampp\htdocs\ResortsSystem\app\Controllers\AdminController.php(1267): require_once('C:\\xampp\\htdocs...')
+#5 C:\xampp\htdocs\ResortsSystem\public\index.php(93): AdminController->unifiedBookingManagement()
+#6 {main} User: {"user_id":1,"role":"Admin","ip":"::1","user_agent":"Mozilla\/5.0 (Windows NT 10.0; Win64; x64) AppleWebKit\/537.36 (KHTML, like Gecko) Chrome\/142.0.0.0 Safari\/537.36"}
+[2025-12-04 17:04:16] [CRITICAL] Uncaught exception: SQLSTATE[42S02]: Base table or view not found: 1146 Table 'resorts_system.reschedulerequests' doesn't exist in C:\xampp\htdocs\ResortsSystem\app\Models\RescheduleRequest.php on line 268
+Stack trace:
+#0 C:\xampp\htdocs\ResortsSystem\app\Models\RescheduleRequest.php(268): PDO->prepare('SELECT COUNT(*)...')
+#1 C:\xampp\htdocs\ResortsSystem\app\Views\partials\admin_sidebar.php(140): RescheduleRequest::getPendingCount()
+#2 C:\xampp\htdocs\ResortsSystem\app\Views\partials\header.php(74): require_once('C:\\xampp\\htdocs...')
+#3 C:\xampp\htdocs\ResortsSystem\app\Views\admin\unified_booking_management.php(3): require_once('C:\\xampp\\htdocs...')
+#4 C:\xampp\htdocs\ResortsSystem\app\Controllers\AdminController.php(1267): require_once('C:\\xampp\\htdocs...')
+#5 C:\xampp\htdocs\ResortsSystem\public\index.php(93): AdminController->unifiedBookingManagement()
+#6 {main} User: {"user_id":1,"role":"Admin","ip":"::1","user_agent":"Mozilla\/5.0 (Windows NT 10.0; Win64; x64) AppleWebKit\/537.36 (KHTML, like Gecko) Chrome\/142.0.0.0 Safari\/537.36"}
+[2025-12-04 17:04:18] [CRITICAL] Uncaught exception: SQLSTATE[42S02]: Base table or view not found: 1146 Table 'resorts_system.reschedulerequests' doesn't exist in C:\xampp\htdocs\ResortsSystem\app\Models\RescheduleRequest.php on line 268
+Stack trace:
+#0 C:\xampp\htdocs\ResortsSystem\app\Models\RescheduleRequest.php(268): PDO->prepare('SELECT COUNT(*)...')
+#1 C:\xampp\htdocs\ResortsSystem\app\Views\partials\admin_sidebar.php(140): RescheduleRequest::getPendingCount()
+#2 C:\xampp\htdocs\ResortsSystem\app\Views\partials\header.php(74): require_once('C:\\xampp\\htdocs...')
+#3 C:\xampp\htdocs\ResortsSystem\app\Views\admin\dashboard.php(14): require_once('C:\\xampp\\htdocs...')
+#4 C:\xampp\htdocs\ResortsSystem\app\Controllers\AdminController.php(98): include('C:\\xampp\\htdocs...')
+#5 C:\xampp\htdocs\ResortsSystem\public\index.php(93): AdminController->dashboard()
+#6 {main} User: {"user_id":1,"role":"Admin","ip":"::1","user_agent":"Mozilla\/5.0 (Windows NT 10.0; Win64; x64) AppleWebKit\/537.36 (KHTML, like Gecko) Chrome\/142.0.0.0 Safari\/537.36"}
+[2025-12-04 17:12:29] [ERROR] PHP Warning: require_once(C:\xampp\htdocs\ResortsSystem\app\Controllers/../Models/RescheduleRequest.php): Failed to open stream: No such file or directory in C:\xampp\htdocs\ResortsSystem\app\Controllers\UserController.php on line 660 User: {"user_id":70,"role":"Staff","ip":"::1","user_agent":"Mozilla\/5.0 (Windows NT 10.0; Win64; x64) AppleWebKit\/537.36 (KHTML, like Gecko) Chrome\/142.0.0.0 Safari\/537.36"}
+[2025-12-04 17:12:50] [ERROR] PHP Warning: require_once(C:\xampp\htdocs\ResortsSystem\app\Controllers/../Models/RescheduleRequest.php): Failed to open stream: No such file or directory in C:\xampp\htdocs\ResortsSystem\app\Controllers\UserController.php on line 660 User: {"user_id":70,"role":"Staff","ip":"::1","user_agent":"Mozilla\/5.0 (Windows NT 10.0; Win64; x64) AppleWebKit\/537.36 (KHTML, like Gecko) Chrome\/142.0.0.0 Safari\/537.36"}
+[2025-12-04 17:20:01] [CRITICAL] Uncaught exception: SQLSTATE[42S02]: Base table or view not found: 1146 Table 'resorts_system.reschedulerequests' doesn't exist in C:\xampp\htdocs\ResortsSystem\app\Models\RescheduleRequest.php on line 263
+Stack trace:
+#0 C:\xampp\htdocs\ResortsSystem\app\Models\RescheduleRequest.php(263): PDO->prepare('SELECT COUNT(*)...')
+#1 C:\xampp\htdocs\ResortsSystem\app\Views\partials\admin_sidebar.php(141): RescheduleRequest::getPendingCount()
+#2 C:\xampp\htdocs\ResortsSystem\app\Views\partials\header.php(74): require_once('C:\\xampp\\htdocs...')
+#3 C:\xampp\htdocs\ResortsSystem\app\Views\admin\unified_booking_management.php(3): require_once('C:\\xampp\\htdocs...')
+#4 C:\xampp\htdocs\ResortsSystem\app\Controllers\AdminController.php(1267): require_once('C:\\xampp\\htdocs...')
+#5 C:\xampp\htdocs\ResortsSystem\public\index.php(93): AdminController->unifiedBookingManagement()
+#6 {main} User: {"user_id":1,"role":"Admin","ip":"::1","user_agent":"Mozilla\/5.0 (Windows NT 10.0; Win64; x64) AppleWebKit\/537.36 (KHTML, like Gecko) Chrome\/142.0.0.0 Safari\/537.36"}
+[2025-12-04 17:20:05] [CRITICAL] Uncaught exception: SQLSTATE[42S02]: Base table or view not found: 1146 Table 'resorts_system.reschedulerequests' doesn't exist in C:\xampp\htdocs\ResortsSystem\app\Models\RescheduleRequest.php on line 263
+Stack trace:
+#0 C:\xampp\htdocs\ResortsSystem\app\Models\RescheduleRequest.php(263): PDO->prepare('SELECT COUNT(*)...')
+#1 C:\xampp\htdocs\ResortsSystem\app\Views\partials\admin_sidebar.php(141): RescheduleRequest::getPendingCount()
+#2 C:\xampp\htdocs\ResortsSystem\app\Views\partials\header.php(74): require_once('C:\\xampp\\htdocs...')
+#3 C:\xampp\htdocs\ResortsSystem\app\Views\admin\unified_booking_management.php(3): require_once('C:\\xampp\\htdocs...')
+#4 C:\xampp\htdocs\ResortsSystem\app\Controllers\AdminController.php(1267): require_once('C:\\xampp\\htdocs...')
+#5 C:\xampp\htdocs\ResortsSystem\public\index.php(93): AdminController->unifiedBookingManagement()
+#6 {main} User: {"user_id":1,"role":"Admin","ip":"::1","user_agent":"Mozilla\/5.0 (Windows NT 10.0; Win64; x64) AppleWebKit\/537.36 (KHTML, like Gecko) Chrome\/142.0.0.0 Safari\/537.36"}
+[2025-12-04 17:22:13] [CRITICAL] Uncaught exception: SQLSTATE[42S02]: Base table or view not found: 1146 Table 'resorts_system.reschedulerequests' doesn't exist in C:\xampp\htdocs\ResortsSystem\app\Models\RescheduleRequest.php on line 263
+Stack trace:
+#0 C:\xampp\htdocs\ResortsSystem\app\Models\RescheduleRequest.php(263): PDO->prepare('SELECT COUNT(*)...')
+#1 C:\xampp\htdocs\ResortsSystem\app\Views\partials\admin_sidebar.php(141): RescheduleRequest::getPendingCount()
+#2 C:\xampp\htdocs\ResortsSystem\app\Views\partials\header.php(74): require_once('C:\\xampp\\htdocs...')
+#3 C:\xampp\htdocs\ResortsSystem\app\Views\admin\unified_booking_management.php(3): require_once('C:\\xampp\\htdocs...')
+#4 C:\xampp\htdocs\ResortsSystem\app\Controllers\AdminController.php(1267): require_once('C:\\xampp\\htdocs...')
+#5 C:\xampp\htdocs\ResortsSystem\public\index.php(93): AdminController->unifiedBookingManagement()
+#6 {main} User: {"user_id":1,"role":"Admin","ip":"::1","user_agent":"Mozilla\/5.0 (Windows NT 10.0; Win64; x64) AppleWebKit\/537.36 (KHTML, like Gecko) Chrome\/142.0.0.0 Safari\/537.36"}
+[2025-12-04 17:22:16] [CRITICAL] Uncaught exception: SQLSTATE[42S02]: Base table or view not found: 1146 Table 'resorts_system.reschedulerequests' doesn't exist in C:\xampp\htdocs\ResortsSystem\app\Models\RescheduleRequest.php on line 263
+Stack trace:
+#0 C:\xampp\htdocs\ResortsSystem\app\Models\RescheduleRequest.php(263): PDO->prepare('SELECT COUNT(*)...')
+#1 C:\xampp\htdocs\ResortsSystem\app\Views\partials\admin_sidebar.php(141): RescheduleRequest::getPendingCount()
+#2 C:\xampp\htdocs\ResortsSystem\app\Views\partials\header.php(74): require_once('C:\\xampp\\htdocs...')
+#3 C:\xampp\htdocs\ResortsSystem\app\Views\admin\payments\pending.php(3): require_once('C:\\xampp\\htdocs...')
+#4 C:\xampp\htdocs\ResortsSystem\app\Controllers\PaymentController.php(137): require_once('C:\\xampp\\htdocs...')
+#5 C:\xampp\htdocs\ResortsSystem\public\index.php(129): PaymentController->showPendingPayments()
+#6 {main} User: {"user_id":1,"role":"Admin","ip":"::1","user_agent":"Mozilla\/5.0 (Windows NT 10.0; Win64; x64) AppleWebKit\/537.36 (KHTML, like Gecko) Chrome\/142.0.0.0 Safari\/537.36"}
+[2025-12-04 17:22:18] [CRITICAL] Uncaught exception: SQLSTATE[42S02]: Base table or view not found: 1146 Table 'resorts_system.reschedulerequests' doesn't exist in C:\xampp\htdocs\ResortsSystem\app\Models\RescheduleRequest.php on line 263
+Stack trace:
+#0 C:\xampp\htdocs\ResortsSystem\app\Models\RescheduleRequest.php(263): PDO->prepare('SELECT COUNT(*)...')
+#1 C:\xampp\htdocs\ResortsSystem\app\Views\partials\admin_sidebar.php(141): RescheduleRequest::getPendingCount()
+#2 C:\xampp\htdocs\ResortsSystem\app\Views\partials\header.php(74): require_once('C:\\xampp\\htdocs...')
+#3 C:\xampp\htdocs\ResortsSystem\app\Views\admin\unified_booking_management.php(3): require_once('C:\\xampp\\htdocs...')
+#4 C:\xampp\htdocs\ResortsSystem\app\Controllers\AdminController.php(1267): require_once('C:\\xampp\\htdocs...')
+#5 C:\xampp\htdocs\ResortsSystem\public\index.php(93): AdminController->unifiedBookingManagement()
+#6 {main} User: {"user_id":1,"role":"Admin","ip":"::1","user_agent":"Mozilla\/5.0 (Windows NT 10.0; Win64; x64) AppleWebKit\/537.36 (KHTML, like Gecko) Chrome\/142.0.0.0 Safari\/537.36"}
+[2025-12-04 17:25:35] [CRITICAL] Uncaught exception: SQLSTATE[42S02]: Base table or view not found: 1146 Table 'resorts_system.reschedulerequests' doesn't exist in C:\xampp\htdocs\ResortsSystem\app\Models\RescheduleRequest.php on line 263
+Stack trace:
+#0 C:\xampp\htdocs\ResortsSystem\app\Models\RescheduleRequest.php(263): PDO->prepare('SELECT COUNT(*)...')
+#1 C:\xampp\htdocs\ResortsSystem\app\Views\admin\unified_booking_management.php(39): RescheduleRequest::getPendingCount()
+#2 C:\xampp\htdocs\ResortsSystem\app\Controllers\AdminController.php(1267): require_once('C:\\xampp\\htdocs...')
+#3 C:\xampp\htdocs\ResortsSystem\public\index.php(93): AdminController->unifiedBookingManagement()
+#4 {main} User: {"user_id":1,"role":"Admin","ip":"::1","user_agent":"Mozilla\/5.0 (Windows NT 10.0; Win64; x64) AppleWebKit\/537.36 (KHTML, like Gecko) Chrome\/142.0.0.0 Safari\/537.36"}
+[2025-12-04 17:25:38] [CRITICAL] Uncaught exception: SQLSTATE[42S02]: Base table or view not found: 1146 Table 'resorts_system.reschedulerequests' doesn't exist in C:\xampp\htdocs\ResortsSystem\app\Models\RescheduleRequest.php on line 263
+Stack trace:
+#0 C:\xampp\htdocs\ResortsSystem\app\Models\RescheduleRequest.php(263): PDO->prepare('SELECT COUNT(*)...')
+#1 C:\xampp\htdocs\ResortsSystem\app\Views\admin\unified_booking_management.php(39): RescheduleRequest::getPendingCount()
+#2 C:\xampp\htdocs\ResortsSystem\app\Controllers\AdminController.php(1267): require_once('C:\\xampp\\htdocs...')
+#3 C:\xampp\htdocs\ResortsSystem\public\index.php(93): AdminController->unifiedBookingManagement()
+#4 {main} User: {"user_id":1,"role":"Admin","ip":"::1","user_agent":"Mozilla\/5.0 (Windows NT 10.0; Win64; x64) AppleWebKit\/537.36 (KHTML, like Gecko) Chrome\/142.0.0.0 Safari\/537.36"}
+[2025-12-04 17:25:41] [CRITICAL] Uncaught exception: SQLSTATE[42S02]: Base table or view not found: 1146 Table 'resorts_system.reschedulerequests' doesn't exist in C:\xampp\htdocs\ResortsSystem\app\Models\RescheduleRequest.php on line 263
+Stack trace:
+#0 C:\xampp\htdocs\ResortsSystem\app\Models\RescheduleRequest.php(263): PDO->prepare('SELECT COUNT(*)...')
+#1 C:\xampp\htdocs\ResortsSystem\app\Views\admin\unified_booking_management.php(39): RescheduleRequest::getPendingCount()
+#2 C:\xampp\htdocs\ResortsSystem\app\Controllers\AdminController.php(1267): require_once('C:\\xampp\\htdocs...')
+#3 C:\xampp\htdocs\ResortsSystem\public\index.php(93): AdminController->unifiedBookingManagement()
+#4 {main} User: {"user_id":1,"role":"Admin","ip":"::1","user_agent":"Mozilla\/5.0 (Windows NT 10.0; Win64; x64) AppleWebKit\/537.36 (KHTML, like Gecko) Chrome\/142.0.0.0 Safari\/537.36"}
+[2025-12-04 17:35:27] [CRITICAL] Uncaught exception: SQLSTATE[42S02]: Base table or view not found: 1146 Table 'resorts_system.reschedulerequests' doesn't exist in C:\xampp\htdocs\ResortsSystem\app\Models\RescheduleRequest.php on line 263
+Stack trace:
+#0 C:\xampp\htdocs\ResortsSystem\app\Models\RescheduleRequest.php(263): PDO->prepare('SELECT COUNT(*)...')
+#1 C:\xampp\htdocs\ResortsSystem\app\Views\admin\dashboard.php(71): RescheduleRequest::getPendingCount(NULL)
+#2 C:\xampp\htdocs\ResortsSystem\app\Controllers\AdminController.php(98): include('C:\\xampp\\htdocs...')
+#3 C:\xampp\htdocs\ResortsSystem\public\index.php(93): AdminController->dashboard()
+#4 {main} User: {"user_id":1,"role":"Admin","ip":"::1","user_agent":"Mozilla\/5.0 (Windows NT 10.0; Win64; x64) AppleWebKit\/537.36 (KHTML, like Gecko) Chrome\/142.0.0.0 Safari\/537.36"}
+[2025-12-04 17:38:49] [CRITICAL] Uncaught exception: SQLSTATE[42S02]: Base table or view not found: 1146 Table 'resorts_system.reschedulerequests' doesn't exist in C:\xampp\htdocs\ResortsSystem\app\Models\RescheduleRequest.php on line 263
+Stack trace:
+#0 C:\xampp\htdocs\ResortsSystem\app\Models\RescheduleRequest.php(263): PDO->prepare('SELECT COUNT(*)...')
+#1 C:\xampp\htdocs\ResortsSystem\app\Views\partials\admin_sidebar.php(141): RescheduleRequest::getPendingCount()
+#2 C:\xampp\htdocs\ResortsSystem\app\Views\partials\header.php(74): require_once('C:\\xampp\\htdocs...')
+#3 C:\xampp\htdocs\ResortsSystem\app\Views\admin\unified_booking_management.php(3): require_once('C:\\xampp\\htdocs...')
+#4 C:\xampp\htdocs\ResortsSystem\app\Controllers\AdminController.php(1267): require_once('C:\\xampp\\htdocs...')
+#5 C:\xampp\htdocs\ResortsSystem\public\index.php(93): AdminController->unifiedBookingManagement()
+#6 {main} User: {"user_id":1,"role":"Admin","ip":"::1","user_agent":"Mozilla\/5.0 (Windows NT 10.0; Win64; x64) AppleWebKit\/537.36 (KHTML, like Gecko) Chrome\/142.0.0.0 Safari\/537.36"}
+[2025-12-04 17:43:30] [CRITICAL] Uncaught exception: SQLSTATE[42S02]: Base table or view not found: 1146 Table 'resorts_system.reschedulerequests' doesn't exist in C:\xampp\htdocs\ResortsSystem\app\Models\RescheduleRequest.php on line 67
+Stack trace:
+#0 C:\xampp\htdocs\ResortsSystem\app\Models\RescheduleRequest.php(67): PDO->prepare('SELECT * FROM R...')
+#1 C:\xampp\htdocs\ResortsSystem\app\Models\RescheduleRequest.php(36): RescheduleRequest::getPendingRequestByBookingId(2037)
+#2 C:\xampp\htdocs\ResortsSystem\app\Controllers\UserController.php(702): RescheduleRequest::create(2037, 73, '2025-12-18', 'overnight', '2025-12-07', 'overnight', 'school')
+#3 C:\xampp\htdocs\ResortsSystem\public\index.php(102): UserController->submitRescheduleRequest()
+#4 {main} User: {"user_id":73,"role":"Customer","ip":"::1","user_agent":"Mozilla\/5.0 (Windows NT 10.0; Win64; x64) AppleWebKit\/537.36 (KHTML, like Gecko) Chrome\/142.0.0.0 Safari\/537.36"}
+[2025-12-04 17:51:22] [CRITICAL] Uncaught exception: SQLSTATE[42S02]: Base table or view not found: 1146 Table 'resorts_system.reschedulerequests' doesn't exist in C:\xampp\htdocs\ResortsSystem\app\Models\RescheduleRequest.php on line 67
+Stack trace:
+#0 C:\xampp\htdocs\ResortsSystem\app\Models\RescheduleRequest.php(67): PDO->prepare('SELECT * FROM R...')
+#1 C:\xampp\htdocs\ResortsSystem\app\Models\RescheduleRequest.php(36): RescheduleRequest::getPendingRequestByBookingId(2029)
+#2 C:\xampp\htdocs\ResortsSystem\app\Controllers\UserController.php(702): RescheduleRequest::create(2029, 73, '2025-12-05', '12_hours', '2025-12-06', '12_hours', 'job')
+#3 C:\xampp\htdocs\ResortsSystem\public\index.php(102): UserController->submitRescheduleRequest()
+#4 {main} User: {"user_id":73,"role":"Customer","ip":"::1","user_agent":"Mozilla\/5.0 (Windows NT 10.0; Win64; x64) AppleWebKit\/537.36 (KHTML, like Gecko) Chrome\/142.0.0.0 Safari\/537.36"}
+[2025-12-04 17:52:43] [CRITICAL] Uncaught exception: SQLSTATE[42S02]: Base table or view not found: 1146 Table 'resorts_system.reschedulerequests' doesn't exist in C:\xampp\htdocs\ResortsSystem\app\Models\RescheduleRequest.php on line 67
+Stack trace:
+#0 C:\xampp\htdocs\ResortsSystem\app\Models\RescheduleRequest.php(67): PDO->prepare('SELECT * FROM R...')
+#1 C:\xampp\htdocs\ResortsSystem\app\Models\RescheduleRequest.php(36): RescheduleRequest::getPendingRequestByBookingId(2029)
+#2 C:\xampp\htdocs\ResortsSystem\app\Controllers\UserController.php(702): RescheduleRequest::create(2029, 73, '2025-12-05', '12_hours', '2025-12-06', '12_hours', 'job')
+#3 C:\xampp\htdocs\ResortsSystem\public\index.php(102): UserController->submitRescheduleRequest()
+#4 {main} User: {"user_id":73,"role":"Customer","ip":"::1","user_agent":"Mozilla\/5.0 (Windows NT 10.0; Win64; x64) AppleWebKit\/537.36 (KHTML, like Gecko) Chrome\/142.0.0.0 Safari\/537.36"}
+[2025-12-04 18:26:21] [CRITICAL] Uncaught exception: SQLSTATE[42S22]: Column not found: 1054 Unknown column 'ba.BookingID' in 'where clause' in C:\xampp\htdocs\ResortsSystem\app\Models\Booking.php on line 788
+Stack trace:
+#0 C:\xampp\htdocs\ResortsSystem\app\Models\Booking.php(788): PDO->prepare('SELECT\n        ...')
+#1 C:\xampp\htdocs\ResortsSystem\app\Controllers\AdminController.php(1257): Booking::getBookingsWithPaymentDetails(Array)
+#2 C:\xampp\htdocs\ResortsSystem\public\index.php(93): AdminController->unifiedBookingManagement()
+#3 {main} User: {"user_id":1,"role":"Admin","ip":"::1","user_agent":"Mozilla\/5.0 (Windows NT 10.0; Win64; x64) AppleWebKit\/537.36 (KHTML, like Gecko) Chrome\/142.0.0.0 Safari\/537.36"}
+[2025-12-04 18:26:24] [CRITICAL] Uncaught exception: SQLSTATE[42S02]: Base table or view not found: 1146 Table 'resorts_system.bookingarchive' doesn't exist in C:\xampp\htdocs\ResortsSystem\app\Models\Booking.php on line 238
+Stack trace:
+#0 C:\xampp\htdocs\ResortsSystem\app\Models\Booking.php(238): PDO->prepare('SELECT b.*, r.N...')
+#1 C:\xampp\htdocs\ResortsSystem\app\Controllers\AdminController.php(64): Booking::findTodaysBookings(NULL)
+#2 C:\xampp\htdocs\ResortsSystem\public\index.php(74): AdminController->dashboard()
+#3 {main} User: {"user_id":1,"role":"Admin","ip":"::1","user_agent":"Mozilla\/5.0 (Windows NT 10.0; Win64; x64) AppleWebKit\/537.36 (KHTML, like Gecko) Chrome\/142.0.0.0 Safari\/537.36"}
+[2025-12-04 18:26:25] [CRITICAL] Uncaught exception: SQLSTATE[42S02]: Base table or view not found: 1146 Table 'resorts_system.bookingarchive' doesn't exist in C:\xampp\htdocs\ResortsSystem\app\Models\Booking.php on line 238
+Stack trace:
+#0 C:\xampp\htdocs\ResortsSystem\app\Models\Booking.php(238): PDO->prepare('SELECT b.*, r.N...')
+#1 C:\xampp\htdocs\ResortsSystem\app\Controllers\AdminController.php(64): Booking::findTodaysBookings(NULL)
+#2 C:\xampp\htdocs\ResortsSystem\public\index.php(74): AdminController->dashboard()
+#3 {main} User: {"user_id":1,"role":"Admin","ip":"::1","user_agent":"Mozilla\/5.0 (Windows NT 10.0; Win64; x64) AppleWebKit\/537.36 (KHTML, like Gecko) Chrome\/142.0.0.0 Safari\/537.36"}
+[2025-12-04 18:29:44] [CRITICAL] Uncaught exception: SQLSTATE[42S02]: Base table or view not found: 1146 Table 'resorts_system.bookingarchive' doesn't exist in C:\xampp\htdocs\ResortsSystem\app\Models\Booking.php on line 238
+Stack trace:
+#0 C:\xampp\htdocs\ResortsSystem\app\Models\Booking.php(238): PDO->prepare('SELECT b.*, r.N...')
+#1 C:\xampp\htdocs\ResortsSystem\app\Controllers\AdminController.php(64): Booking::findTodaysBookings(NULL)
+#2 C:\xampp\htdocs\ResortsSystem\public\index.php(74): AdminController->dashboard()
+#3 {main} User: {"user_id":1,"role":"Admin","ip":"::1","user_agent":"Mozilla\/5.0 (Windows NT 10.0; Win64; x64) AppleWebKit\/537.36 (KHTML, like Gecko) Chrome\/142.0.0.0 Safari\/537.36"}
+[2025-12-04 18:39:01] [CRITICAL] Uncaught exception: SQLSTATE[42S02]: Base table or view not found: 1146 Table 'resorts_system.bookingarchive' doesn't exist in C:\xampp\htdocs\ResortsSystem\app\Models\Booking.php on line 784
+Stack trace:
+#0 C:\xampp\htdocs\ResortsSystem\app\Models\Booking.php(784): PDO->prepare('SELECT\n        ...')
+#1 C:\xampp\htdocs\ResortsSystem\app\Controllers\AdminController.php(1256): Booking::getBookingsWithPaymentDetails(Array)
+#2 C:\xampp\htdocs\ResortsSystem\public\index.php(93): AdminController->unifiedBookingManagement()
+#3 {main} User: {"user_id":1,"role":"Admin","ip":"::1","user_agent":"Mozilla\/5.0 (Windows NT 10.0; Win64; x64) AppleWebKit\/537.36 (KHTML, like Gecko) Chrome\/142.0.0.0 Safari\/537.36"}
+[2025-12-04 19:43:18] [submitRescheduleRequest called with: bookingId=, date=, timeSlot=, role=Staff] DEBUG User: {"user_id":1,"role":"Staff"}
+[2025-12-04 19:47:40] [submitRescheduleRequest called with: bookingId=, date=2025-12-07, timeSlot=12_hours, role=Staff] DEBUG User: {"user_id":70,"role":"Staff","ip":"::1","user_agent":"Mozilla\/5.0 (Windows NT 10.0; Win64; x64) AppleWebKit\/537.36 (KHTML, like Gecko) Chrome\/142.0.0.0 Safari\/537.36"}
+[2025-12-04 19:48:39] [submitRescheduleRequest called with: bookingId=, date=2025-12-05, timeSlot=12_hours, role=Staff] DEBUG User: {"user_id":70,"role":"Staff","ip":"::1","user_agent":"Mozilla\/5.0 (Windows NT 10.0; Win64; x64) AppleWebKit\/537.36 (KHTML, like Gecko) Chrome\/142.0.0.0 Safari\/537.36"}
+[2025-12-04 20:38:23] [CRITICAL] Uncaught exception: Call to undefined method BookingAuditTrail::log() in C:\xampp\htdocs\ResortsSystem\app\Controllers\AdminController.php on line 2915
+Stack trace:
+#0 C:\xampp\htdocs\ResortsSystem\public\index.php(93): AdminController->archiveBooking()
+#1 {main} User: {"user_id":1,"role":"Admin","ip":"::1","user_agent":"Mozilla\/5.0 (Windows NT 10.0; Win64; x64) AppleWebKit\/537.36 (KHTML, like Gecko) Chrome\/142.0.0.0 Safari\/537.36"}
+[2025-12-04 20:38:34] [CRITICAL] Uncaught exception: Call to undefined method BookingAuditTrail::log() in C:\xampp\htdocs\ResortsSystem\app\Controllers\AdminController.php on line 2915
+Stack trace:
+#0 C:\xampp\htdocs\ResortsSystem\public\index.php(93): AdminController->archiveBooking()
+#1 {main} User: {"user_id":1,"role":"Admin","ip":"::1","user_agent":"Mozilla\/5.0 (Windows NT 10.0; Win64; x64) AppleWebKit\/537.36 (KHTML, like Gecko) Chrome\/142.0.0.0 Safari\/537.36"}
+[2025-12-07 13:10:29] [ERROR] PHP Warning: foreach() argument must be of type array|object, string given in C:\xampp\htdocs\ResortsSystem\app\Controllers\AdminController.php on line 984 User: {"user_id":1,"role":"Admin","ip":"::1","user_agent":"Mozilla\/5.0 (Windows NT 10.0; Win64; x64) AppleWebKit\/537.36 (KHTML, like Gecko) Chrome\/142.0.0.0 Safari\/537.36"}
+[2025-12-07 13:11:27] [ERROR] PHP Warning: foreach() argument must be of type array|object, string given in C:\xampp\htdocs\ResortsSystem\app\Controllers\AdminController.php on line 984 User: {"user_id":1,"role":"Admin","ip":"::1","user_agent":"Mozilla\/5.0 (Windows NT 10.0; Win64; x64) AppleWebKit\/537.36 (KHTML, like Gecko) Chrome\/142.0.0.0 Safari\/537.36"}
+[2025-12-07 13:23:01] [ERROR] PHP Warning: require_once(C:\xampp\htdocs\ResortsSystem\app\Views\admin\promotions/../../Models/PromotionNotification.php): Failed to open stream: No such file or directory in C:\xampp\htdocs\ResortsSystem\app\Views\admin\promotions\edit.php on line 99 User: {"user_id":1,"role":"Admin","ip":"::1","user_agent":"Mozilla\/5.0 (Windows NT 10.0; Win64; x64) AppleWebKit\/537.36 (KHTML, like Gecko) Chrome\/142.0.0.0 Safari\/537.36"}
+[2025-12-07 13:23:48] [CRITICAL] Uncaught exception: Call to undefined method AsyncHelper::queueEmail() in C:\xampp\htdocs\ResortsSystem\app\Models\PromotionNotification.php on line 140
+Stack trace:
+#0 C:\xampp\htdocs\ResortsSystem\app\Controllers\AdminController.php(3067): PromotionNotification::sendToCustomers(1, Array)
+#1 C:\xampp\htdocs\ResortsSystem\public\index.php(93): AdminController->sendPromotion()
+#2 {main} User: {"user_id":1,"role":"Admin","ip":"::1","user_agent":"Mozilla\/5.0 (Windows NT 10.0; Win64; x64) AppleWebKit\/537.36 (KHTML, like Gecko) Chrome\/142.0.0.0 Safari\/537.36"}
+[2025-12-07 13:29:23] [CRITICAL] Uncaught exception: Undefined constant "SMTP_HOST" in C:\xampp\htdocs\ResortsSystem\app\Models\PromotionNotification.php on line 135
+Stack trace:
+#0 C:\xampp\htdocs\ResortsSystem\app\Controllers\AdminController.php(3067): PromotionNotification::sendToCustomers(1, Array)
+#1 C:\xampp\htdocs\ResortsSystem\public\index.php(93): AdminController->sendPromotion()
+#2 {main} User: {"user_id":1,"role":"Admin","ip":"::1","user_agent":"Mozilla\/5.0 (Windows NT 10.0; Win64; x64) AppleWebKit\/537.36 (KHTML, like Gecko) Chrome\/142.0.0.0 Safari\/537.36"}
+[2025-12-07 13:31:41] [CRITICAL] Uncaught exception: Undefined constant "SMTP_HOST" in C:\xampp\htdocs\ResortsSystem\app\Models\PromotionNotification.php on line 135
+Stack trace:
+#0 C:\xampp\htdocs\ResortsSystem\app\Controllers\AdminController.php(3067): PromotionNotification::sendToCustomers(2, Array)
+#1 C:\xampp\htdocs\ResortsSystem\public\index.php(93): AdminController->sendPromotion()
+#2 {main} User: {"user_id":1,"role":"Admin","ip":"::1","user_agent":"Mozilla\/5.0 (Windows NT 10.0; Win64; x64) AppleWebKit\/537.36 (KHTML, like Gecko) Chrome\/142.0.0.0 Safari\/537.36"}
+[2025-12-07 13:41:52] [ERROR] PHP Warning: Undefined array key "title" in C:\xampp\htdocs\ResortsSystem\app\Models\PromotionNotification.php on line 92 User: {"user_id":1,"role":"Admin","ip":"::1","user_agent":"Mozilla\/5.0 (Windows NT 10.0; Win64; x64) AppleWebKit\/537.36 (KHTML, like Gecko) Chrome\/142.0.0.0 Safari\/537.36"}
+[2025-12-07 13:56:52] [ERROR] PHP Warning: include(C:\xampp\htdocs\ResortsSystem\app\Views\email\promotion.php): Failed to open stream: No such file or directory in C:\xampp\htdocs\ResortsSystem\app\Models\PromotionNotification.php on line 185 User: {"user_id":1,"role":"Admin","ip":"::1","user_agent":"Mozilla\/5.0 (Windows NT 10.0; Win64; x64) AppleWebKit\/537.36 (KHTML, like Gecko) Chrome\/142.0.0.0 Safari\/537.36"}
+[2025-12-07 13:56:52] [ERROR] PHP Warning: require_once(C:\xampp\htdocs\ResortsSystem\app\Controllers/../Models/PromotionNotification.php): Failed to open stream: No such file or directory in C:\xampp\htdocs\ResortsSystem\app\Controllers\AdminController.php on line 3048 User: {"user_id":1,"role":"Admin","ip":"::1","user_agent":"Mozilla\/5.0 (Windows NT 10.0; Win64; x64) AppleWebKit\/537.36 (KHTML, like Gecko) Chrome\/142.0.0.0 Safari\/537.36"}
+[2025-12-07 15:47:32] [CRITICAL] Uncaught exception: SQLSTATE[42S02]: Base table or view not found: 1146 Table 'resorts_system.newssentlog' doesn't exist in C:\xampp\htdocs\ResortsSystem\app\Models\PromotionNotification.php on line 225
+Stack trace:
+#0 C:\xampp\htdocs\ResortsSystem\app\Models\PromotionNotification.php(225): PDOStatement->execute(Array)
+#1 C:\xampp\htdocs\ResortsSystem\app\Models\PromotionNotification.php(198): PromotionNotification::logSent(8, '73')
+#2 C:\xampp\htdocs\ResortsSystem\app\Controllers\AdminController.php(3060): PromotionNotification::sendToCustomers(8, Array)
+#3 C:\xampp\htdocs\ResortsSystem\public\index.php(93): AdminController->sendPromotion()
+#4 {main} User: {"user_id":1,"role":"Admin","ip":"::1","user_agent":"Mozilla\/5.0 (Windows NT 10.0; Win64; x64) AppleWebKit\/537.36 (KHTML, like Gecko) Chrome\/142.0.0.0 Safari\/537.36"}
+[2025-12-08 02:44:51] [CRITICAL] Uncaught exception: SQLSTATE[42S02]: Base table or view not found: 1146 Table 'resorts_system.newssentlog' doesn't exist in C:\xampp\htdocs\ResortsSystem\app\Models\PromotionNotification.php on line 225
+Stack trace:
+#0 C:\xampp\htdocs\ResortsSystem\app\Models\PromotionNotification.php(225): PDOStatement->execute(Array)
+#1 C:\xampp\htdocs\ResortsSystem\app\Models\PromotionNotification.php(198): PromotionNotification::logSent(2, '74')
+#2 C:\xampp\htdocs\ResortsSystem\app\Controllers\AdminController.php(3060): PromotionNotification::sendToCustomers(2, Array)
+#3 C:\xampp\htdocs\ResortsSystem\public\index.php(93): AdminController->sendPromotion()
+#4 {main} User: {"user_id":1,"role":"Admin","ip":"::1","user_agent":"Mozilla\/5.0 (Windows NT 10.0; Win64; x64) AppleWebKit\/537.36 (KHTML, like Gecko) Chrome\/142.0.0.0 Safari\/537.36"}
+[2025-12-08 02:48:53] [ERROR] PHP Warning: Undefined array key "title" in C:\xampp\htdocs\ResortsSystem\app\Models\PromotionNotification.php on line 100 User: {"user_id":1,"role":"Admin","ip":"::1","user_agent":"Mozilla\/5.0 (Windows NT 10.0; Win64; x64) AppleWebKit\/537.36 (KHTML, like Gecko) Chrome\/142.0.0.0 Safari\/537.36"}
+[2025-12-08 02:56:41] [ERROR] PHP Warning: require_once(C:\xampp\htdocs\ResortsSystem\app\Views\admin\promotions/../../Models/PromotionNotification.php): Failed to open stream: No such file or directory in C:\xampp\htdocs\ResortsSystem\app\Views\admin\promotions\edit.php on line 50 User: {"user_id":1,"role":"Admin","ip":"::1","user_agent":"Mozilla\/5.0 (Windows NT 10.0; Win64; x64) AppleWebKit\/537.36 (KHTML, like Gecko) Chrome\/142.0.0.0 Safari\/537.36"}
+[2025-12-08 03:24:51] [ERROR] PHP Warning: require_once(C:\xampp\htdocs\ResortsSystem\app\Views\admin\promotions/../../Models/PromotionNotification.php): Failed to open stream: No such file or directory in C:\xampp\htdocs\ResortsSystem\app\Views\admin\promotions\edit.php on line 50 User: {"user_id":1,"role":"Admin","ip":"::1","user_agent":"Mozilla\/5.0 (Windows NT 10.0; Win64; x64) AppleWebKit\/537.36 (KHTML, like Gecko) Chrome\/142.0.0.0 Safari\/537.36"}
+[2025-12-08 03:24:58] [ERROR] PHP Warning: require_once(C:\xampp\htdocs\ResortsSystem\app\Views\admin\promotions/../../Models/PromotionNotification.php): Failed to open stream: No such file or directory in C:\xampp\htdocs\ResortsSystem\app\Views\admin\promotions\edit.php on line 50 User: {"user_id":1,"role":"Admin","ip":"::1","user_agent":"Mozilla\/5.0 (Windows NT 10.0; Win64; x64) AppleWebKit\/537.36 (KHTML, like Gecko) Chrome\/142.0.0.0 Safari\/537.36"}

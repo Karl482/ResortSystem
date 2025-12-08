@@ -995,6 +995,23 @@ class AdminController {
         return $uploadedPaths;
     }
 
+    private function handleSinglePhotoUpload($fileInputName, $type = 'promotions') {
+        if (isset($_FILES[$fileInputName]) && $_FILES[$fileInputName]['error'] === UPLOAD_ERR_OK) {
+            $uploadDir = __DIR__ . '/../../public/uploads/' . $type . '/';
+            if (!is_dir($uploadDir)) {
+                mkdir($uploadDir, 0777, true);
+            }
+
+            $fileName = uniqid() . '-' . basename($_FILES[$fileInputName]['name']);
+            $targetPath = $uploadDir . $fileName;
+
+            if (move_uploaded_file($_FILES[$fileInputName]['tmp_name'], $targetPath)) {
+                return '/public/uploads/' . $type . '/' . $fileName;
+            }
+        }
+        return null;
+    }
+
 
     public function getPaymentMethodsJson() {
         header('Content-Type: application/json');
@@ -1265,6 +1282,204 @@ class AdminController {
         $totalNonCompletedBookings = Booking::getActiveBookingsCountForAdmin($filters['resort_id']);
 
         require_once __DIR__ . '/../Views/admin/unified_booking_management.php';
+    }
+
+    /**
+     * Admin: list pending reschedule requests
+     */
+    public function rescheduleRequests() {
+        if ($_SESSION['role'] !== 'Admin') {
+            http_response_code(403);
+            require_once __DIR__ . '/../Views/errors/403.php';
+            exit();
+        }
+
+        if (!User::hasAdminPermission($_SESSION['user_id'], 'booking_management')) {
+            http_response_code(403);
+            require_once __DIR__ . '/../Views/errors/403.php';
+            exit();
+        }
+
+        $resortId = filter_input(INPUT_GET, 'resort_id', FILTER_VALIDATE_INT);
+        require_once __DIR__ . '/../Models/RescheduleRequest.php';
+
+        $requests = RescheduleRequest::getAllPendingRequests($resortId);
+        $resorts = Resort::findAll();
+
+        require_once __DIR__ . '/../Views/admin/reschedule_requests.php';
+    }
+
+    /**
+     * Direct admin/staff reschedule (from unified management)
+     */
+    public function rescheduleBooking() {
+        if ($_SERVER['REQUEST_METHOD'] !== 'POST') {
+            header('Location: ?controller=admin&action=unifiedBookingManagement');
+            exit();
+        }
+
+        // Only Admins and Staff with booking access can perform direct reschedules
+        if (!in_array($_SESSION['role'], ['Admin', 'Staff']) || !User::hasAdminPermission($_SESSION['user_id'], 'booking_management')) {
+            $_SESSION['error_message'] = 'Unauthorized to reschedule bookings.';
+            header('Location: ?controller=admin&action=unifiedBookingManagement');
+            exit();
+        }
+
+        $bookingId = filter_input(INPUT_POST, 'booking_id', FILTER_VALIDATE_INT);
+        $newDate = filter_input(INPUT_POST, 'new_booking_date', FILTER_UNSAFE_RAW);
+        $newTimeSlot = filter_input(INPUT_POST, 'new_time_slot', FILTER_UNSAFE_RAW);
+        $reason = filter_input(INPUT_POST, 'reschedule_reason', FILTER_UNSAFE_RAW);
+
+        if (!$bookingId || !$newDate || !$newTimeSlot) {
+            $_SESSION['error_message'] = 'Please provide all required fields for rescheduling.';
+            header('Location: ?controller=admin&action=unifiedBookingManagement');
+            exit();
+        }
+
+        require_once __DIR__ . '/../Models/Booking.php';
+        require_once __DIR__ . '/../Models/BookingFacilities.php';
+        require_once __DIR__ . '/../Models/BookingAuditTrail.php';
+
+        $booking = Booking::findById($bookingId);
+        if (!$booking) {
+            $_SESSION['error_message'] = 'Booking not found.';
+            header('Location: ?controller=admin&action=unifiedBookingManagement');
+            exit();
+        }
+
+        // If staff, ensure they are assigned to the resort for this booking
+        if ($_SESSION['role'] === 'Staff') {
+            $assigned = User::getAssignedResorts($_SESSION['user_id']);
+            $assignedIds = array_map(function($r){ return $r->ResortID; }, $assigned);
+            if (!in_array($booking->resortId, $assignedIds)) {
+                $_SESSION['error_message'] = 'You are not assigned to this resort.';
+                header('Location: ?controller=admin&action=unifiedBookingManagement');
+                exit();
+            }
+        }
+
+        // Prevent rescheduling cancelled/completed bookings
+        if (in_array($booking->status, ['Cancelled', 'Completed'])) {
+            $_SESSION['error_message'] = "Cannot reschedule a {$booking->status} booking.";
+            header('Location: ?controller=admin&action=unifiedBookingManagement');
+            exit();
+        }
+
+        // Check availability
+        $facilityIds = BookingFacilities::getFacilityIds($bookingId);
+        if (!Booking::isResortTimeframeAvailable($booking->resortId, $newDate, $newTimeSlot, $facilityIds, $bookingId)) {
+            $_SESSION['error_message'] = 'The selected date/time is not available for this resort or facilities.';
+            header('Location: ?controller=admin&action=unifiedBookingManagement');
+            exit();
+        }
+
+        // Perform update inside transaction
+        $db = Booking::getConnection();
+        try {
+            $db->beginTransaction();
+
+            $oldDisplay = $booking->bookingDate . ' (' . $booking->timeSlotType . ')';
+            $booking->bookingDate = $newDate;
+            $booking->timeSlotType = $newTimeSlot;
+            $updated = Booking::update($booking);
+
+            if (!$updated) {
+                throw new Exception('Failed to update booking');
+            }
+
+            $newDisplay = $booking->bookingDate . ' (' . $booking->timeSlotType . ')';
+            BookingAuditTrail::logChange(
+                $bookingId,
+                $_SESSION['user_id'],
+                'UPDATE',
+                'BookingDate & TimeSlot',
+                $oldDisplay,
+                $newDisplay,
+                'Direct reschedule by admin/staff. Reason: ' . ($reason ?: 'Not specified')
+            );
+
+            $db->commit();
+
+            // Notify customer
+            require_once __DIR__ . '/../Helpers/Notification.php';
+            Notification::sendBookingRescheduleNotification($bookingId, $booking->bookingDate, $booking->timeSlotType);
+
+            $_SESSION['success_message'] = 'Booking rescheduled successfully.';
+        } catch (Exception $e) {
+            if ($db->inTransaction()) $db->rollBack();
+            $_SESSION['error_message'] = 'Failed to reschedule booking: ' . $e->getMessage();
+        }
+
+        header('Location: ?controller=admin&action=unifiedBookingManagement');
+        exit();
+    }
+
+    /**
+     * Approve a reschedule request (AJAX)
+     */
+    public function approveRescheduleRequest() {
+        header('Content-Type: application/json');
+        if ($_SERVER['REQUEST_METHOD'] !== 'POST') {
+            echo json_encode(['success' => false, 'error' => 'Invalid request method']);
+            exit();
+        }
+
+        if (!User::hasAdminPermission($_SESSION['user_id'], 'booking_management')) {
+            echo json_encode(['success' => false, 'error' => 'Unauthorized']);
+            exit();
+        }
+
+        $requestId = filter_input(INPUT_POST, 'request_id', FILTER_VALIDATE_INT);
+        $reviewNotes = filter_input(INPUT_POST, 'review_notes', FILTER_UNSAFE_RAW) ?: null;
+
+        if (!$requestId) {
+            echo json_encode(['success' => false, 'error' => 'Request ID required']);
+            exit();
+        }
+
+        require_once __DIR__ . '/../Models/RescheduleRequest.php';
+
+        $result = RescheduleRequest::approve($requestId, $_SESSION['user_id'], $reviewNotes);
+        if ($result['success']) {
+            echo json_encode(['success' => true]);
+        } else {
+            echo json_encode(['success' => false, 'error' => $result['error'] ?? 'Approval failed']);
+        }
+        exit();
+    }
+
+    /**
+     * Reject a reschedule request (AJAX)
+     */
+    public function rejectRescheduleRequest() {
+        header('Content-Type: application/json');
+        if ($_SERVER['REQUEST_METHOD'] !== 'POST') {
+            echo json_encode(['success' => false, 'error' => 'Invalid request method']);
+            exit();
+        }
+
+        if (!User::hasAdminPermission($_SESSION['user_id'], 'booking_management')) {
+            echo json_encode(['success' => false, 'error' => 'Unauthorized']);
+            exit();
+        }
+
+        $requestId = filter_input(INPUT_POST, 'request_id', FILTER_VALIDATE_INT);
+        $reviewNotes = filter_input(INPUT_POST, 'review_notes', FILTER_UNSAFE_RAW) ?: null;
+
+        if (!$requestId) {
+            echo json_encode(['success' => false, 'error' => 'Request ID required']);
+            exit();
+        }
+
+        require_once __DIR__ . '/../Models/RescheduleRequest.php';
+
+        $result = RescheduleRequest::reject($requestId, $_SESSION['user_id'], $reviewNotes);
+        if ($result['success']) {
+            echo json_encode(['success' => true]);
+        } else {
+            echo json_encode(['success' => false, 'error' => $result['error'] ?? 'Rejection failed']);
+        }
+        exit();
     }
 
     /**
@@ -2676,5 +2891,389 @@ class AdminController {
         if (strpos($name, 'season') !== false) return 'fas fa-cloud-sun';
         if (strpos($name, 'classic') !== false) return 'fas fa-gopuram';
         return 'fas fa-hotel'; // Default icon
+    }
+
+    /**
+     * Promotions
+     */
+    public function promotions() {
+        if ($_SESSION['role'] !== 'Admin') {
+            http_response_code(403);
+            require_once __DIR__ . '/../Views/errors/403.php';
+            exit();
+        }
+
+        require_once __DIR__ . '/../Models/PromotionNotification.php';
+        $promotions = PromotionNotification::getAll();
+        
+        require_once __DIR__ . '/../Views/admin/promotions/index.php';
+    }
+
+    public function createPromotion() {
+        if ($_SESSION['role'] !== 'Admin') {
+            http_response_code(403);
+            require_once __DIR__ . '/../Views/errors/403.php';
+            exit();
+        }
+
+        if ($_SERVER['REQUEST_METHOD'] === 'POST') {
+            require_once __DIR__ . '/../Models/PromotionNotification.php';
+            
+            $title = filter_input(INPUT_POST, 'title', FILTER_UNSAFE_RAW);
+            $message = filter_input(INPUT_POST, 'message', FILTER_UNSAFE_RAW);
+            
+            // Log for debugging
+            error_log("Creating news - Title: " . $title . ", Message length: " . strlen($message));
+            
+            $data = [
+                'title' => $title,
+                'message' => $message,
+                'image_url' => null,
+                'cta_button_text' => 'View Details',
+                'discount_code' => null,
+                'expiration_date' => null,
+                'created_by' => $_SESSION['user_id'],
+                'status' => 'Active'
+            ];
+
+            $promotionId = PromotionNotification::create($data);
+            
+            error_log("News creation result - ID: " . ($promotionId ? $promotionId : 'FAILED'));
+            
+            if ($promotionId) {
+                $_SESSION['success_message'] = "Promotion created successfully!";
+                header('Location: ?controller=admin&action=promotions');
+            } else {
+                $_SESSION['error_message'] = "Failed to create promotion. Please check the logs.";
+                header('Location: ?controller=admin&action=createPromotion');
+            }
+            exit();
+        }
+
+        require_once __DIR__ . '/../Views/admin/promotions/create.php';
+    }
+
+    public function editPromotion() {
+        if ($_SESSION['role'] !== 'Admin') {
+            http_response_code(403);
+            require_once __DIR__ . '/../Views/errors/403.php';
+            exit();
+        }
+
+        $promotionId = filter_input(INPUT_GET, 'id', FILTER_VALIDATE_INT);
+        if (!$promotionId) {
+            $_SESSION['error_message'] = "Invalid promotion ID.";
+            header('Location: ?controller=admin&action=promotions');
+            exit();
+        }
+
+        require_once __DIR__ . '/../Models/PromotionNotification.php';
+        $promotion = PromotionNotification::findById($promotionId);
+
+        if (!$promotion) {
+            $_SESSION['error_message'] = "Promotion not found.";
+            header('Location: ?controller=admin&action=promotions');
+            exit();
+        }
+
+        if ($_SERVER['REQUEST_METHOD'] === 'POST') {
+            $data = [
+                'title' => filter_input(INPUT_POST, 'title', FILTER_UNSAFE_RAW),
+                'message' => filter_input(INPUT_POST, 'message', FILTER_UNSAFE_RAW),
+                'image_url' => $promotion->ImageURL,
+                'cta_button_text' => $promotion->CTAButtonText,
+                'discount_code' => $promotion->DiscountCode,
+                'expiration_date' => $promotion->ExpirationDate,
+                'status' => 'Active'
+            ];
+
+            if (PromotionNotification::update($promotionId, $data)) {
+                $_SESSION['success_message'] = "Promotion updated successfully!";
+                header('Location: ?controller=admin&action=promotions');
+            } else {
+                $_SESSION['error_message'] = "Failed to update promotion.";
+                header('Location: ?controller=admin&action=editPromotion&id=' . $promotionId);
+            }
+            exit();
+        }
+
+        require_once __DIR__ . '/../Views/admin/promotions/edit.php';
+    }
+
+    public function deletePromotion() {
+        if ($_SESSION['role'] !== 'Admin') {
+            http_response_code(403);
+            exit();
+        }
+
+        $promotionId = filter_input(INPUT_GET, 'id', FILTER_VALIDATE_INT);
+        if (!$promotionId) {
+            $_SESSION['error_message'] = "Invalid promotion ID.";
+            header('Location: ?controller=admin&action=promotions');
+            exit();
+        }
+
+        require_once __DIR__ . '/../Models/PromotionNotification.php';
+        
+        if (PromotionNotification::delete($promotionId)) {
+            $_SESSION['success_message'] = "Promotion deleted successfully!";
+        } else {
+            $_SESSION['error_message'] = "Failed to delete promotion.";
+        }
+
+        header('Location: ?controller=admin&action=promotions');
+        exit();
+    }
+
+    public function sendPromotion() {
+        if ($_SESSION['role'] !== 'Admin') {
+            http_response_code(403);
+            exit();
+        }
+
+        $promotionId = filter_input(INPUT_GET, 'id', FILTER_VALIDATE_INT);
+        if (!$promotionId) {
+            $_SESSION['error_message'] = "Invalid promotion ID.";
+            header('Location: ?controller=admin&action=promotions');
+            exit();
+        }
+
+        require_once __DIR__ . '/../Models/PromotionNotification.php';
+        require_once __DIR__ . '/../Models/User.php';
+        
+        $promotion = PromotionNotification::findById($promotionId);
+        if (!$promotion) {
+            $_SESSION['error_message'] = "Promotion not found.";
+            header('Location: ?controller=admin&action=promotions');
+            exit();
+        }
+
+        if ($_SERVER['REQUEST_METHOD'] === 'POST') {
+            $customerIds = $_POST['customer_ids'] ?? [];
+            
+            if (empty($customerIds)) {
+                $_SESSION['error_message'] = "Please select at least one customer.";
+                header('Location: ?controller=admin&action=sendPromotion&id=' . $promotionId);
+                exit();
+            }
+
+            $result = PromotionNotification::sendToCustomers($promotionId, $customerIds);
+            
+            if ($result['success']) {
+                $_SESSION['success_message'] = "Promotion sent to {$result['sent']} customers!";
+                
+                // Update status to Sent
+                $updateData = [
+                    'title' => $promotion->Title,
+                    'message' => $promotion->Message,
+                    'image_url' => $promotion->ImageURL,
+                    'cta_button_text' => $promotion->CTAButtonText,
+                    'discount_code' => $promotion->DiscountCode,
+                    'expiration_date' => $promotion->ExpirationDate,
+                    'status' => 'Sent'
+                ];
+                PromotionNotification::update($promotionId, $updateData);
+            } else {
+                $_SESSION['error_message'] = "Failed to send promotion.";
+            }
+
+            header('Location: ?controller=admin&action=promotions');
+            exit();
+        }
+
+        // Get all users (customers, staff, and admins)
+        $allUsers = User::findAll();
+        
+        // Organize users by role for better display
+        $usersByRole = [
+            'Customer' => [],
+            'Staff' => [],
+            'Admin' => []
+        ];
+        
+        foreach ($allUsers as $user) {
+            if (isset($usersByRole[$user['Role']])) {
+                $usersByRole[$user['Role']][] = $user;
+            }
+        }
+        
+        require_once __DIR__ . '/../Views/admin/promotions/send.php';
+    }
+
+    public function previewPromotion() {
+        if ($_SESSION['role'] !== 'Admin') {
+            http_response_code(403);
+            exit();
+        }
+
+        $promotionId = filter_input(INPUT_GET, 'id', FILTER_VALIDATE_INT);
+        require_once __DIR__ . '/../Models/PromotionNotification.php';
+        
+        $promotion = PromotionNotification::findById($promotionId);
+        if (!$promotion) {
+            die('Promotion not found');
+        }
+
+        $data = [
+            'customer_name' => 'John Doe',
+            'title' => $promotion->Title,
+            'message' => $promotion->Message,
+            'image_url' => $promotion->ImageURL,
+            'cta_button_text' => $promotion->CTAButtonText,
+            'discount_code' => $promotion->DiscountCode,
+            'expiration_date' => $promotion->ExpirationDate
+        ];
+
+        require_once __DIR__ . '/../Views/email/promotion.php';
+    }
+
+    /**
+     * Archive a booking (move to archived status)
+     */
+    public function archiveBooking() {
+        if ($_SERVER['REQUEST_METHOD'] !== 'POST') {
+            header('Location: ?controller=admin&action=unifiedBookingManagement');
+            exit();
+        }
+
+        if ($_SESSION['role'] !== 'Admin') {
+            $_SESSION['error_message'] = "You are not authorized to perform this action.";
+            header('Location: ?controller=admin&action=unifiedBookingManagement');
+            exit();
+        }
+
+        $bookingId = filter_input(INPUT_POST, 'booking_id', FILTER_VALIDATE_INT);
+        if (!$bookingId) {
+            $_SESSION['error_message'] = "Invalid booking ID.";
+            header('Location: ?controller=admin&action=unifiedBookingManagement');
+            exit();
+        }
+
+        require_once __DIR__ . '/../Models/Booking.php';
+        require_once __DIR__ . '/../Models/BookingAuditTrail.php';
+
+        $booking = Booking::findById($bookingId);
+        if (!$booking) {
+            $_SESSION['error_message'] = "Booking not found.";
+            header('Location: ?controller=admin&action=unifiedBookingManagement');
+            exit();
+        }
+
+        // Only allow archiving of Cancelled or Completed bookings
+        if (!in_array($booking->status, ['Cancelled', 'Completed'])) {
+            $_SESSION['error_message'] = "Only Cancelled or Completed bookings can be archived. Current status: {$booking->status}";
+            header('Location: ?controller=admin&action=unifiedBookingManagement');
+            exit();
+        }
+
+        // Update booking status to Archived
+        $oldStatus = $booking->status;
+        $booking->status = 'Archived';
+        if (Booking::update($booking)) {
+            // Log the archive action
+            BookingAuditTrail::logStatusChange(
+                $bookingId,
+                $_SESSION['user_id'],
+                $oldStatus,
+                'Archived',
+                'Booking archived by admin'
+            );
+
+            $_SESSION['success_message'] = "Booking #{$bookingId} has been archived successfully.";
+        } else {
+            $_SESSION['error_message'] = "Failed to archive booking #{$bookingId}.";
+        }
+
+        header('Location: ?controller=admin&action=unifiedBookingManagement');
+        exit();
+    }
+
+    /**
+     * View archived bookings
+     */
+    public function archivedBookings() {
+        if ($_SESSION['role'] !== 'Admin') {
+            http_response_code(403);
+            require_once __DIR__ . '/../Views/errors/403.php';
+            exit();
+        }
+
+        if (!User::hasAdminPermission($_SESSION['user_id'], 'booking_management')) {
+            http_response_code(403);
+            require_once __DIR__ . '/../Views/errors/403.php';
+            exit();
+        }
+
+        $filters = [
+            'resort_id' => filter_input(INPUT_GET, 'resort_id', FILTER_VALIDATE_INT),
+            'status' => 'Archived', // Only show archived bookings
+            'customer_id' => filter_input(INPUT_GET, 'customer_id', FILTER_VALIDATE_INT),
+            'payment_status' => filter_input(INPUT_GET, 'payment_status', FILTER_UNSAFE_RAW),
+            'month' => filter_input(INPUT_GET, 'month', FILTER_VALIDATE_INT),
+            'year' => filter_input(INPUT_GET, 'year', FILTER_VALIDATE_INT),
+            'customer_name_search' => filter_input(INPUT_GET, 'customer_name_search', FILTER_UNSAFE_RAW)
+        ];
+
+        $resorts = Resort::findAll();
+        $bookings = Booking::getBookingsWithPaymentDetails($filters);
+        $archivedCount = count($bookings);
+
+        require_once __DIR__ . '/../Views/admin/archived_bookings.php';
+    }
+
+    /**
+     * Unarchive a booking (restore from archived status)
+     */
+    public function unarchiveBooking() {
+        if ($_SERVER['REQUEST_METHOD'] !== 'POST') {
+            header('Location: ?controller=admin&action=archivedBookings');
+            exit();
+        }
+
+        if ($_SESSION['role'] !== 'Admin') {
+            $_SESSION['error_message'] = "You are not authorized to perform this action.";
+            header('Location: ?controller=admin&action=archivedBookings');
+            exit();
+        }
+
+        $bookingId = filter_input(INPUT_POST, 'booking_id', FILTER_VALIDATE_INT);
+        $newStatus = filter_input(INPUT_POST, 'new_status', FILTER_UNSAFE_RAW) ?? 'Completed';
+
+        if (!$bookingId) {
+            $_SESSION['error_message'] = "Invalid booking ID.";
+            header('Location: ?controller=admin&action=archivedBookings');
+            exit();
+        }
+
+        require_once __DIR__ . '/../Models/Booking.php';
+        require_once __DIR__ . '/../Models/BookingAuditTrail.php';
+
+        $booking = Booking::findById($bookingId);
+        if (!$booking) {
+            $_SESSION['error_message'] = "Booking not found.";
+            header('Location: ?controller=admin&action=archivedBookings');
+            exit();
+        }
+
+        // Restore booking to specified status
+        $oldStatus = $booking->status;
+        $booking->status = $newStatus;
+        if (Booking::update($booking)) {
+            // Log the unarchive action
+            BookingAuditTrail::logStatusChange(
+                $bookingId,
+                $_SESSION['user_id'],
+                $oldStatus,
+                $newStatus,
+                'Booking unarchived by admin'
+            );
+
+            $_SESSION['success_message'] = "Booking #{$bookingId} has been restored to {$newStatus} status.";
+        } else {
+            $_SESSION['error_message'] = "Failed to restore booking #{$bookingId}.";
+        }
+
+        header('Location: ?controller=admin&action=archivedBookings');
+        exit();
     }
 }

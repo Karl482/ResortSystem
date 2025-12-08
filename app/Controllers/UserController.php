@@ -638,6 +638,142 @@ class UserController {
     private function isGmailAddress($email) {
         return (bool) preg_match('/@gmail\.com$/i', $email);
     }
+
+    /**
+     * Submit a reschedule request (Customer/Staff)
+     */
+    public function submitRescheduleRequest() {
+        if ($_SERVER['REQUEST_METHOD'] !== 'POST') {
+            $redirectUrl = isset($_SESSION['role']) && $_SESSION['role'] === 'Staff' 
+                ? '?controller=admin&action=staffDashboard' 
+                : '?controller=user&action=myBookings';
+            header('Location: ' . $redirectUrl);
+            exit();
+        }
+
+        if (!isset($_SESSION['user_id'])) {
+            $_SESSION['error_message'] = "Please log in to submit a reschedule request.";
+            header('Location: ?action=login');
+            exit();
+        }
+
+        require_once __DIR__ . '/../Models/RescheduleRequest.php';
+        require_once __DIR__ . '/../Models/Booking.php';
+
+        $bookingId = filter_input(INPUT_POST, 'booking_id', FILTER_VALIDATE_INT);
+        $requestedDate = filter_input(INPUT_POST, 'requested_date', FILTER_UNSAFE_RAW);
+        $requestedTimeSlot = filter_input(INPUT_POST, 'requested_time_slot', FILTER_UNSAFE_RAW);
+        $reason = filter_input(INPUT_POST, 'reason', FILTER_UNSAFE_RAW);
+
+        $redirectUrl = isset($_SESSION['role']) && $_SESSION['role'] === 'Staff' 
+            ? '?controller=admin&action=staffDashboard' 
+            : '?controller=user&action=myBookings';
+
+        if (!$bookingId || !$requestedDate || !$requestedTimeSlot) {
+            $_SESSION['error_message'] = "Please provide all required information.";
+            header('Location: ' . $redirectUrl);
+            exit();
+        }
+
+        // Get booking details
+        $booking = Booking::findById($bookingId);
+        if (!$booking) {
+            $_SESSION['error_message'] = "Booking not found.";
+            header('Location: ' . $redirectUrl);
+            exit();
+        }
+
+        // For customers: verify they own the booking
+        // For staff: allow them to reschedule any booking
+        if ($_SESSION['role'] === 'Customer' && $booking->customerId != $_SESSION['user_id']) {
+            $_SESSION['error_message'] = "You are not authorized to reschedule this booking.";
+            header('Location: ' . $redirectUrl);
+            exit();
+        }
+
+        // Check if booking can be rescheduled
+        if ($booking->status === 'Cancelled' || $booking->status === 'Completed') {
+            $_SESSION['error_message'] = "Cannot reschedule a {$booking->status} booking.";
+            header('Location: ' . $redirectUrl);
+            exit();
+        }
+
+        // Create reschedule request
+        $result = RescheduleRequest::create(
+            $bookingId,
+            $_SESSION['user_id'],
+            $booking->bookingDate,
+            $booking->timeSlotType,
+            $requestedDate,
+            $requestedTimeSlot,
+            $reason
+        );
+
+        // Detect AJAX
+        $isAjax = false;
+        if (!empty($_SERVER['HTTP_X_REQUESTED_WITH']) && strtolower($_SERVER['HTTP_X_REQUESTED_WITH']) === 'xmlhttprequest') {
+            $isAjax = true;
+        }
+        if (!$isAjax && !empty($_SERVER['HTTP_ACCEPT']) && strpos($_SERVER['HTTP_ACCEPT'], 'application/json') !== false) {
+            $isAjax = true;
+        }
+
+        if ($isAjax) {
+            header('Content-Type: application/json');
+            if ($result['success']) {
+                $pendingCount = RescheduleRequest::getPendingCount();
+                echo json_encode(['success' => true, 'message' => 'Your reschedule request has been submitted and is pending admin approval.', 'pendingCount' => $pendingCount]);
+            } else {
+                echo json_encode(['success' => false, 'error' => $result['error'] ?? 'Failed to submit request.']);
+            }
+            exit();
+        }
+
+        if ($result['success']) {
+            $_SESSION['success_message'] = "Your reschedule request has been submitted and is pending admin approval.";
+        } else {
+            $_SESSION['error_message'] = $result['error'];
+        }
+
+        header('Location: ' . $redirectUrl);
+        exit();
+    }
+
+    /**
+     * Cancel a reschedule request
+     */
+    public function cancelRescheduleRequest() {
+        if (!isset($_SESSION['user_id'])) {
+            $_SESSION['error_message'] = "Please log in.";
+            header('Location: ?action=login');
+            exit();
+        }
+
+        require_once __DIR__ . '/../Models/RescheduleRequest.php';
+
+        $requestId = filter_input(INPUT_GET, 'request_id', FILTER_VALIDATE_INT);
+        
+        $redirectUrl = isset($_SESSION['role']) && $_SESSION['role'] === 'Staff' 
+            ? '?controller=admin&action=staffDashboard' 
+            : '?controller=user&action=myBookings';
+
+        if (!$requestId) {
+            $_SESSION['error_message'] = "Invalid request.";
+            header('Location: ' . $redirectUrl);
+            exit();
+        }
+
+        $result = RescheduleRequest::cancel($requestId, $_SESSION['user_id']);
+
+        if ($result['success']) {
+            $_SESSION['success_message'] = "Reschedule request cancelled.";
+        } else {
+            $_SESSION['error_message'] = $result['error'];
+        }
+
+        header('Location: ' . $redirectUrl);
+        exit();
+    }
 }
 
 // This router is now handled by public/index.php

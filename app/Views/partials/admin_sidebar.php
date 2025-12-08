@@ -15,9 +15,17 @@ $isStaffRole = ($currentUserRole === 'Staff');
 // Calculate badge counts (only for Admins)
 $totalPendingPayments = 0;
 $totalActiveBookings = 0;
+$pendingRescheduleCount = 0;
 if (!$isStaffRole) {
     $totalPendingPayments = Payment::getPendingPaymentCount();
     $totalActiveBookings = Booking::getActiveBookingsCountForAdmin();
+    // Reschedule requests count (defensive: table may not exist)
+    try {
+        require_once __DIR__ . '/../../Models/RescheduleRequest.php';
+        $pendingRescheduleCount = RescheduleRequest::getPendingCount();
+    } catch (Exception $e) {
+        $pendingRescheduleCount = 0;
+    }
 }
 
 // Check admin permissions (Staff has limited permissions)
@@ -96,7 +104,8 @@ function isDropdownActive($items, $currentController, $currentAction) {
                 <?php 
                 $bookingItems = [
                     ['controller' => 'admin', 'action' => 'unifiedBookingManagement'],
-                    ['controller' => 'payment', 'action' => 'showPendingPayments']
+                    ['controller' => 'payment', 'action' => 'showPendingPayments'],
+                    ['controller' => 'admin', 'action' => 'rescheduleRequests']
                 ];
                 $isBookingActive = isDropdownActive($bookingItems, $currentController, $currentAction);
                 ?>
@@ -128,6 +137,18 @@ function isDropdownActive($items, $currentController, $currentAction) {
                                 <?php if ($totalPendingPayments > 0): ?>
                                     <span class="sidebar-badge bg-danger"><?= $totalPendingPayments ?></span>
                                 <?php endif; ?>
+                            </a>
+                        </li>
+                        <li>
+                            <a class="sidebar-sublink <?= isNavActive('admin', 'rescheduleRequests', $currentController, $currentAction) ? 'active' : '' ?>"
+                               href="?controller=admin&action=rescheduleRequests">
+                                <i class="fas fa-exchange-alt"></i>
+                                <span>Reschedule Requests</span>
+                                <?php
+                                // Render badge element with an id so JS can update it dynamically.
+                                $rsCount = (int)($pendingRescheduleCount ?? 0);
+                                ?>
+                                <span id="rescheduleBadge" class="sidebar-badge bg-warning <?= $rsCount === 0 ? 'd-none' : '' ?>" data-count="<?= $rsCount ?>"><?= $rsCount > 0 ? $rsCount : '' ?></span>
                             </a>
                         </li>
                     </ul>
@@ -236,6 +257,17 @@ function isDropdownActive($items, $currentController, $currentAction) {
                 </li>
             <?php endif; ?>
 
+            <!-- News & Announcements -->
+            <?php if ($isMainAdmin): ?>
+                <li>
+                    <a class="sidebar-link <?= in_array($currentAction, ['promotions', 'createPromotion', 'editPromotion', 'sendPromotion']) ? 'active' : '' ?>" 
+                       href="?controller=admin&action=promotions">
+                        <i class="fas fa-newspaper"></i>
+                        <span>News & Announcements</span>
+                    </a>
+                </li>
+            <?php endif; ?>
+
             <?php if ($isMainAdmin): ?>
                 <!-- System Section -->
                 <?php 
@@ -340,3 +372,74 @@ function isDropdownActive($items, $currentController, $currentAction) {
         </div>
     </nav>
 </aside>
+<!-- Sidebar helper scripts: preserve submenu state and update reschedule badge on event -->
+<script>
+(function(){
+    // Preserve the booking submenu collapse state in localStorage
+    var bookingSubmenu = document.getElementById('bookingSubmenu');
+    if (bookingSubmenu) {
+        var key = 'sidebar_booking_submenu_open';
+        try {
+            var open = localStorage.getItem(key);
+            if (open === 'true') {
+                bookingSubmenu.classList.add('show');
+            } else if (open === 'false') {
+                bookingSubmenu.classList.remove('show');
+            }
+        } catch (e) {}
+
+        var toggles = document.querySelectorAll('[href="#bookingSubmenu"]');
+        toggles.forEach(function(t){
+            t.addEventListener('click', function(){
+                // Delay reading the class until after bootstrap toggles the collapse
+                setTimeout(function(){
+                    try {
+                        var isOpen = bookingSubmenu.classList.contains('show');
+                        localStorage.setItem(key, isOpen ? 'true' : 'false');
+                    } catch(e){}
+                }, 200);
+            });
+        });
+    }
+
+    // Keep all sidebar dropdowns open unless another is clicked
+    document.addEventListener('DOMContentLoaded', function() {
+        const dropdownToggles = document.querySelectorAll('.sidebar [data-bs-toggle="collapse"]');
+        
+        dropdownToggles.forEach(function(toggle) {
+            toggle.addEventListener('click', function(e) {
+                const targetId = this.getAttribute('href') || this.getAttribute('data-bs-target');
+                const allCollapses = document.querySelectorAll('.sidebar .collapse');
+                
+                // Close other dropdowns when opening a new one
+                allCollapses.forEach(function(collapse) {
+                    if ('#' + collapse.id !== targetId && collapse.classList.contains('show')) {
+                        const bsCollapse = bootstrap.Collapse.getInstance(collapse);
+                        if (bsCollapse) {
+                            bsCollapse.hide();
+                        }
+                    }
+                });
+            });
+        });
+    });
+
+    // Update reschedule badge when a custom event is dispatched
+    var badge = document.getElementById('rescheduleBadge');
+    window.addEventListener('reschedule:submitted', function(e){
+        try {
+            var count = parseInt((e.detail && e.detail.pendingCount) || 0, 10);
+            if (!badge) return;
+            if (count && count > 0) {
+                badge.textContent = count;
+                badge.dataset.count = count;
+                badge.classList.remove('d-none');
+            } else {
+                badge.textContent = '';
+                badge.dataset.count = 0;
+                badge.classList.add('d-none');
+            }
+        } catch(err) {}
+    });
+})();
+</script>
