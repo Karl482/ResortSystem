@@ -200,11 +200,7 @@ function changePerPage(perPage) {
     params.set('page', 1); // Reset to first page when changing per page
     window.location.search = params.toString();
 }
-</script>
 
-<script>
-
-<script>
 document.addEventListener('DOMContentLoaded', function () {
     // Client-side simple search filtering (booking ID or customer name)
     const searchInput = document.getElementById('rescheduleSearchInput');
@@ -245,34 +241,52 @@ document.addEventListener('DOMContentLoaded', function () {
         if (!requestId) return;
 
         if (approveBtn) {
-            if (!confirm('Approve this reschedule request?')) return;
+            if (!confirm('Approve this reschedule request? This will update the booking date and time.')) return;
             approveBtn.disabled = true;
+            approveBtn.innerHTML = '<i class="fas fa-spinner fa-spin"></i> Processing...';
+            
             postAction('?controller=admin&action=approveRescheduleRequest', { request_id: requestId })
                 .then(res => {
                     if (res.success) {
-                        row.remove();
+                        alert('Reschedule request approved successfully!');
+                        window.location.reload(); // Reload to update count and pagination
                     } else {
                         alert(res.error || 'Approval failed');
                         approveBtn.disabled = false;
+                        approveBtn.innerHTML = '<i class="fas fa-check"></i> Approve';
                     }
                 })
-                .catch(err => { alert('Network error'); approveBtn.disabled = false; });
+                .catch(err => { 
+                    console.error('Error:', err);
+                    alert('Network error: ' + err.message); 
+                    approveBtn.disabled = false;
+                    approveBtn.innerHTML = '<i class="fas fa-check"></i> Approve';
+                });
         }
 
         if (rejectBtn) {
             const notes = prompt('Optional rejection notes (visible to user):');
             if (notes === null) return; // cancelled
             rejectBtn.disabled = true;
+            rejectBtn.innerHTML = '<i class="fas fa-spinner fa-spin"></i> Processing...';
+            
             postAction('?controller=admin&action=rejectRescheduleRequest', { request_id: requestId, review_notes: notes })
                 .then(res => {
                     if (res.success) {
-                        row.remove();
+                        alert('Reschedule request rejected successfully!');
+                        window.location.reload(); // Reload to update count and pagination
                     } else {
                         alert(res.error || 'Rejection failed');
                         rejectBtn.disabled = false;
+                        rejectBtn.innerHTML = '<i class="fas fa-times"></i> Reject';
                     }
                 })
-                .catch(err => { alert('Network error'); rejectBtn.disabled = false; });
+                .catch(err => { 
+                    console.error('Error:', err);
+                    alert('Network error: ' + err.message); 
+                    rejectBtn.disabled = false;
+                    rejectBtn.innerHTML = '<i class="fas fa-times"></i> Reject';
+                });
         }
     });
 });
